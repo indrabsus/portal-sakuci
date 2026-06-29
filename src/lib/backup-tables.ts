@@ -1,0 +1,30 @@
+// Daftar tabel data bisnis yang ikut di-backup/restore.
+// Tabel terkait auth (profiles, akun_guru, akun_siswa) sengaja dikecualikan
+// karena terikat ke auth.users yang punya siklus hidup sendiri.
+export const BACKUP_TABLES: { table: string; pk: string }[] = [
+  { table: "jurusan", pk: "id_jurusan" },
+  { table: "tahun_ajaran", pk: "id_tahun_ajaran" },
+  { table: "kelas", pk: "id_kelas" },
+  { table: "guru", pk: "id_guru" },
+  { table: "siswa", pk: "id_siswa" },
+  { table: "siswa_kelas", pk: "id_siswa_kelas" },
+  { table: "mapel", pk: "id_mapel" },
+  { table: "mengajar", pk: "id_mengajar" },
+  { table: "kompetensi", pk: "id_kompetensi" },
+  { table: "progres_kompetensi", pk: "id_progres" },
+  { table: "sertifikat", pk: "id_sertifikat" },
+  { table: "materi", pk: "id_materi" },
+  { table: "tugas", pk: "id_tugas" },
+  { table: "bank_soal", pk: "id_soal" },
+  { table: "opsi_jawaban", pk: "id_opsi" },
+  { table: "tugas_soal", pk: "id_tugas_soal" },
+  { table: "pengumpulan_tugas", pk: "id_pengumpulan" },
+  { table: "jawaban_tugas_siswa", pk: "id_jawaban" },
+  { table: "nilai_komponen", pk: "id_komponen" },
+  { table: "nilai_siswa", pk: "id_nilai_siswa" },
+  { table: "kompetensi_tugas", pk: "id_kompetensi_tugas" },
+  { table: "kompetensi_tugas_soal", pk: "id_kompetensi_tugas_soal" },
+  { table: "pengumpulan_kompetensi", pk: "id_pengumpulan_kompetensi" },
+  { table: "jawaban_kompetensi_siswa", pk: "id_jawaban_kompetensi" },
+  { table: "pengumuman", pk: "id_pengumuman" },
+];

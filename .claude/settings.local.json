@@ -1,7 +1,23 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx --yes create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)"
+      "Bash(npx --yes create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(npm install *)",
+      "Bash(npx --yes shadcn@latest init -d)",
+      "Bash(npx --yes shadcn@latest add button input label card table dialog dropdown-menu select badge form textarea tabs sonner separator avatar sheet skeleton popover calendar checkbox alert-dialog progress)",
+      "Bash(npx --yes shadcn@latest add form)",
+      "Bash(node -e \"console.log\\('node ok'\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(git mv *)",
+      "Bash(nohup npm run dev -- -p 3500)",
+      "Bash(curl -s -o /tmp/login.html -w \"%{http_code}\\\\n\" http://localhost:3500/login)",
+      "Bash(curl -s -o /tmp/akt.html -w \"%{http_code}\\\\n\" http://localhost:3500/aktivasi)",
+      "Bash(curl -s http://localhost:3500/login)",
+      "Bash(curl -s http://localhost:3500/login -o /tmp/login2.html)",
+      "Read(//tmp/**)",
+      "Bash(curl -s http://localhost:3500/login -o /tmp/login3.html)",
+      "Bash(pkill -f \"next dev -p 3500\")"
     ]
   }
 }
