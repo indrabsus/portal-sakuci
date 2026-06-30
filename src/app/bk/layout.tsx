@@ -20,8 +20,8 @@ export default async function BkLayout({ children }: { children: React.ReactNode
     <div className="flex min-h-screen">
       <SidebarNav title="BK" items={NAV_ITEMS} />
       <div className="flex flex-1 flex-col bg-muted/30">
-        <TopBar tahunAjaranLabel={tahunAjaranLabel} email={profile.email} />
-        <main className="flex-1 overflow-x-hidden p-6 md:p-8 print:p-0">
+        <TopBar tahunAjaranLabel={tahunAjaranLabel} email={profile.email} navTitle="BK" navItems={NAV_ITEMS} />
+        <main className="flex-1 overflow-x-hidden p-4 md:p-8 print:p-0">
           <div className="mx-auto max-w-6xl print:max-w-none">{children}</div>
           <div className="mx-auto max-w-6xl print:hidden"><AppFooter /></div>
         </main>

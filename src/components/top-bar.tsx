@@ -4,31 +4,40 @@ import { LogOut } from "lucide-react";
 import { logoutAction } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { MobileNav, type NavItem } from "@/components/sidebar-nav";
 
 export function TopBar({
   tahunAjaranLabel,
   email,
+  navTitle,
+  navItems,
 }: {
   tahunAjaranLabel: string | null;
   email: string | null;
+  navTitle: string;
+  navItems: NavItem[];
 }) {
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-background/80 px-6 backdrop-blur-sm">
-      <p className="text-sm text-muted-foreground">
-        {tahunAjaranLabel ? (
-          <>
-            Tahun Ajaran: <span className="font-medium text-foreground">{tahunAjaranLabel}</span>
-          </>
-        ) : null}
-      </p>
+    <header className="flex h-14 items-center justify-between gap-2 border-b bg-background/80 px-3 backdrop-blur-sm sm:px-6">
+      <div className="flex min-w-0 items-center gap-2">
+        <MobileNav title={navTitle} items={navItems} />
+        <p className="truncate text-xs text-muted-foreground sm:text-sm">
+          {tahunAjaranLabel ? (
+            <>
+              <span className="hidden sm:inline">Tahun Ajaran: </span>
+              <span className="font-medium text-foreground">{tahunAjaranLabel}</span>
+            </>
+          ) : null}
+        </p>
+      </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <ThemeToggle />
-        {email && <span className="text-sm text-muted-foreground">{email}</span>}
+        {email && <span className="hidden max-w-[160px] truncate text-sm text-muted-foreground md:inline">{email}</span>}
         <form action={logoutAction}>
           <Button type="submit" variant="outline" size="sm" className="gap-1.5">
             <LogOut className="size-3.5" />
-            Logout
+            <span className="hidden sm:inline">Logout</span>
           </Button>
         </form>
       </div>

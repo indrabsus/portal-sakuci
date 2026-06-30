@@ -25,8 +25,8 @@ export default async function SiswaLayout({ children }: { children: React.ReactN
     <div className="flex min-h-screen">
       <SidebarNav title="Siswa" items={NAV_ITEMS} />
       <div className="flex flex-1 flex-col bg-muted/30">
-        <TopBar tahunAjaranLabel={tahunAjaranLabel} email={profile.email} />
-        <main className="flex-1 overflow-x-hidden p-6 md:p-8 print:p-0">
+        <TopBar tahunAjaranLabel={tahunAjaranLabel} email={profile.email} navTitle="Siswa" navItems={NAV_ITEMS} />
+        <main className="flex-1 overflow-x-hidden p-4 md:p-8 print:p-0">
           <div className="mx-auto max-w-6xl print:max-w-none">{children}</div>
           <div className="mx-auto max-w-6xl print:hidden"><AppFooter /></div>
         </main>

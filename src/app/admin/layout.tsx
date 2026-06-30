@@ -28,8 +28,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="flex min-h-screen">
       <SidebarNav title="Admin" items={NAV_ITEMS} />
       <div className="flex flex-1 flex-col bg-muted/30">
-        <TopBar tahunAjaranLabel={tahunAjaranLabel} email={profile.email} />
-        <main className="flex-1 overflow-x-hidden p-6 md:p-8">
+        <TopBar tahunAjaranLabel={tahunAjaranLabel} email={profile.email} navTitle="Admin" navItems={NAV_ITEMS} />
+        <main className="flex-1 overflow-x-hidden p-4 md:p-8">
           <div className="mx-auto max-w-6xl">{children}</div>
           <div className="mx-auto max-w-6xl"><AppFooter /></div>
         </main>
