@@ -25,6 +25,9 @@ import {
   Search,
   Building2,
   UserCircle,
+  MessageCircle,
+  HeartHandshake,
+  NotebookPen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +54,9 @@ const ICONS = {
   search: Search,
   building: Building2,
   "user-circle": UserCircle,
+  "message-circle": MessageCircle,
+  "heart-handshake": HeartHandshake,
+  "notebook-pen": NotebookPen,
 } as const;
 
 export type NavIconKey = keyof typeof ICONS;

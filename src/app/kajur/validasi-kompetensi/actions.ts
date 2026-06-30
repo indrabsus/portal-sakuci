@@ -3,8 +3,10 @@
 import { requireKajurJurusan } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { recomputeProgresKompetensi } from "@/lib/kompetensi-progress";
+import { koreksiEssayAI } from "@/lib/ai-koreksi";
 
 type ActionResult = { success: boolean; message: string };
+type KoreksiAIResult = { success: boolean; message: string; nilai?: number; alasan?: string };
 
 async function verifyJawabanOwnership(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -37,6 +39,46 @@ export async function simpanNilaiEssayKompetensi(formData: FormData): Promise<Ac
   const { error } = await supabase.from("jawaban_kompetensi_siswa").update({ nilai }).eq("id_jawaban_kompetensi", idJawaban);
   if (error) return { success: false, message: error.message };
   return { success: true, message: "Nilai essay tersimpan." };
+}
+
+export async function koreksiEssayKompetensiAI(formData: FormData): Promise<KoreksiAIResult> {
+  const profile = await requireKajurJurusan();
+  const supabase = await createClient();
+
+  const idJawaban = String(formData.get("id_jawaban") ?? "");
+  if (!idJawaban) return { success: false, message: "Data tidak valid." };
+  if (!(await verifyJawabanOwnership(supabase, idJawaban, profile.id_jurusan))) {
+    return { success: false, message: "Jawaban ini bukan dari jurusan Anda." };
+  }
+
+  const { data: jawaban } = await supabase
+    .from("jawaban_kompetensi_siswa")
+    .select("jawaban_text, soal_kompetensi(pertanyaan, pembahasan, tipe_soal)")
+    .eq("id_jawaban_kompetensi", idJawaban)
+    .single();
+
+  const soal = jawaban?.soal_kompetensi as unknown as { pertanyaan: string; pembahasan: string | null; tipe_soal: string } | null;
+  if (!jawaban || soal?.tipe_soal !== "essay") {
+    return { success: false, message: "Soal ini bukan tipe essay." };
+  }
+
+  try {
+    const hasil = await koreksiEssayAI({
+      pertanyaan: soal.pertanyaan,
+      pembahasan: soal.pembahasan,
+      jawabanSiswa: jawaban.jawaban_text ?? "",
+    });
+
+    const { error } = await supabase
+      .from("jawaban_kompetensi_siswa")
+      .update({ nilai: hasil.nilai })
+      .eq("id_jawaban_kompetensi", idJawaban);
+    if (error) return { success: false, message: error.message };
+
+    return { success: true, message: "Koreksi AI berhasil.", nilai: hasil.nilai, alasan: hasil.alasan };
+  } catch (e) {
+    return { success: false, message: e instanceof Error ? e.message : "Gagal menghubungi layanan AI." };
+  }
 }
 
 export async function finalisasiNilaiKompetensi(formData: FormData): Promise<ActionResult> {

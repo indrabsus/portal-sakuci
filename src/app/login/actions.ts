@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth";
 
 export async function loginAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
@@ -34,7 +35,8 @@ export async function loginAction(formData: FormData) {
     sameSite: "lax",
   });
 
-  redirect("/");
+  const profile = await getCurrentProfile();
+  redirect(profile ? `/${profile.role}/dashboard` : "/");
 }
 
 export async function logoutAction() {

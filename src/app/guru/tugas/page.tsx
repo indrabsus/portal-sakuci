@@ -9,13 +9,17 @@ export default async function TugasPage() {
 
   const { data: mengajarList } = await supabase
     .from("mengajar")
-    .select("id_mengajar, mapel(nama_mapel), kelas(nama_kelas)")
+    .select("id_mengajar, mapel(nama_mapel), kelas(nama_kelas, tingkat)")
     .eq("id_guru", profile.id_guru ?? "");
 
-  const mengajarOptions = (mengajarList ?? []).map((m) => ({
-    value: m.id_mengajar,
-    label: `${(m.mapel as unknown as { nama_mapel: string } | null)?.nama_mapel ?? "-"} - ${(m.kelas as unknown as { nama_kelas: string } | null)?.nama_kelas ?? "-"}`,
-  }));
+  const mengajarOptions = (mengajarList ?? []).map((m) => {
+    const kelas = m.kelas as unknown as { nama_kelas: string; tingkat: number | null } | null;
+    const kelasLabel = kelas ? (kelas.tingkat ? `${kelas.tingkat} ${kelas.nama_kelas}` : kelas.nama_kelas) : "-";
+    return {
+      value: m.id_mengajar,
+      label: `${(m.mapel as unknown as { nama_mapel: string } | null)?.nama_mapel ?? "-"} - ${kelasLabel}`,
+    };
+  });
   const idMengajarList = mengajarOptions.map((m) => m.value);
   const mengajarLabelMap = new Map(mengajarOptions.map((m) => [m.value, m.label]));
 

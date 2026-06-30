@@ -2,12 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X } from "lucide-react";
+import { Check, X, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { simpanNilaiEssayKompetensi, finalisasiNilaiKompetensi } from "../actions";
+import { simpanNilaiEssayKompetensi, finalisasiNilaiKompetensi, koreksiEssayKompetensiAI } from "../actions";
 
 export type JawabanDetail = {
   id_jawaban: string;
@@ -38,6 +38,25 @@ export function NilaiModal({
     Object.fromEntries(jawaban.filter((j) => j.tipe_soal === "essay").map((j) => [j.id_jawaban, j.nilai])),
   );
   const [message, setMessage] = useState<string | null>(null);
+  const [alasanAI, setAlasanAI] = useState<Record<string, string>>({});
+  const [koreksiPendingId, setKoreksiPendingId] = useState<string | null>(null);
+
+  function handleKoreksiAI(idJawaban: string) {
+    setMessage(null);
+    setKoreksiPendingId(idJawaban);
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.set("id_jawaban", idJawaban);
+      const result = await koreksiEssayKompetensiAI(formData);
+      setKoreksiPendingId(null);
+      if (!result.success) {
+        setMessage(result.message);
+        return;
+      }
+      setNilaiEssay((prev) => ({ ...prev, [idJawaban]: result.nilai ?? 0 }));
+      setAlasanAI((prev) => ({ ...prev, [idJawaban]: result.alasan ?? "-" }));
+    });
+  }
 
   function handleSimpan() {
     setMessage(null);
@@ -96,7 +115,24 @@ export function NilaiModal({
                       value={nilaiEssay[j.id_jawaban] ?? 0}
                       onChange={(e) => setNilaiEssay((prev) => ({ ...prev, [j.id_jawaban]: Number(e.target.value) }))}
                     />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      disabled={isPending}
+                      onClick={() => handleKoreksiAI(j.id_jawaban)}
+                    >
+                      <Sparkles className="size-3.5" />
+                      {koreksiPendingId === j.id_jawaban ? "Mengoreksi..." : "Koreksi AI"}
+                    </Button>
                   </div>
+                  {alasanAI[j.id_jawaban] && (
+                    <p className="rounded-md bg-primary/5 p-2 text-xs text-muted-foreground">
+                      <span className="font-medium text-primary">Alasan AI: </span>
+                      {alasanAI[j.id_jawaban]}
+                    </p>
+                  )}
                 </div>
               )}
             </div>

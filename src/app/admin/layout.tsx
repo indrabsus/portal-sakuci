@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/auth";
 import { getTahunAjaranAktifLabel } from "@/lib/tahun-ajaran";
 import { SidebarNav, type NavIconKey } from "@/components/sidebar-nav";
 import { TopBar } from "@/components/top-bar";
+import { AppFooter } from "@/components/app-footer";
 
 const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/admin/dashboard", label: "Dashboard", icon: "dashboard" },
@@ -12,6 +13,7 @@ const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/admin/guru", label: "Guru", icon: "graduation-cap" },
   { href: "/admin/siswa", label: "Siswa", icon: "users" },
   { href: "/admin/mapel", label: "Mata Pelajaran", icon: "book-open" },
+  { href: "/admin/konseling", label: "Konseling Siswa", icon: "heart-handshake" },
   { href: "/admin/informasi-sekolah", label: "Informasi Sekolah", icon: "building" },
   { href: "/admin/reset-password", label: "Reset Password", icon: "key-round" },
   { href: "/admin/backup", label: "Backup & Restore", icon: "database-backup" },
@@ -29,6 +31,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <TopBar tahunAjaranLabel={tahunAjaranLabel} email={profile.email} />
         <main className="flex-1 overflow-x-hidden p-6 md:p-8">
           <div className="mx-auto max-w-6xl">{children}</div>
+          <div className="mx-auto max-w-6xl"><AppFooter /></div>
         </main>
       </div>
     </div>

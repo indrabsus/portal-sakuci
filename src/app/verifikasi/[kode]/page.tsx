@@ -1,5 +1,6 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { AppFooter } from "@/components/app-footer";
 
 export default async function VerifikasiPage({ params }: { params: Promise<{ kode: string }> }) {
   const { kode } = await params;
@@ -14,7 +15,7 @@ export default async function VerifikasiPage({ params }: { params: Promise<{ kod
   const valid = !!sertifikat && sertifikat.status === "aktif";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/20 p-4">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/20 p-4">
       <div className="w-full max-w-md rounded-2xl border bg-card/90 p-8 text-center shadow-xl shadow-primary/5 backdrop-blur-sm">
         {valid ? (
           <CheckCircle2 className="mx-auto size-14 text-primary" />
@@ -42,6 +43,7 @@ export default async function VerifikasiPage({ params }: { params: Promise<{ kod
           </div>
         )}
       </div>
+      <div className="absolute inset-x-0 bottom-2"><AppFooter /></div>
     </div>
   );
 }

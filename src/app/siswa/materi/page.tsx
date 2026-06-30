@@ -4,11 +4,16 @@ import { createClient } from "@/lib/supabase/server";
 import { getSiswaKelasInfo } from "@/lib/siswa";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { YoutubeThumbnail } from "@/components/youtube-thumbnail";
 
 function getTipe(isi: string | null, fileUrl: string | null): "teks" | "yt" | "file" {
   if (fileUrl) return "file";
   if (isi?.includes("youtube.com") || isi?.includes("youtu.be")) return "yt";
   return "teks";
+}
+
+function formatTanggal(tanggal: string) {
+  return new Intl.DateTimeFormat("id-ID", { dateStyle: "long" }).format(new Date(tanggal));
 }
 
 export default async function SiswaMateriPage() {
@@ -58,14 +63,11 @@ export default async function SiswaMateriPage() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">{mengajarLabelMap.get(m.id_mengajar) ?? "-"}</p>
+                  <p className="text-xs text-muted-foreground">Dipublikasikan {formatTanggal(m.created_at)}</p>
                 </CardHeader>
                 <CardContent>
                   {tipe === "teks" && <p className="whitespace-pre-wrap text-sm">{m.isi}</p>}
-                  {tipe === "yt" && (
-                    <a href={m.isi ?? "#"} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-primary underline-offset-4 hover:underline">
-                      Tonton di YouTube <ExternalLink className="size-3.5" />
-                    </a>
-                  )}
+                  {tipe === "yt" && <YoutubeThumbnail url={m.isi} />}
                   {tipe === "file" && (
                     <a href={m.file_url ?? "#"} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-primary underline-offset-4 hover:underline">
                       Buka File <ExternalLink className="size-3.5" />

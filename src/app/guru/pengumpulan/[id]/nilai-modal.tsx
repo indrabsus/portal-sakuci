@@ -52,8 +52,12 @@ export function NilaiModal({
       const formData = new FormData();
       formData.set("id_pengumpulan", idPengumpulan);
       const result = await finalisasiNilai(formData);
-      setMessage(result.message);
+      if (!result.success) {
+        setMessage(result.message);
+        return;
+      }
       router.refresh();
+      onOpenChange(false);
     });
   }
 
@@ -83,6 +87,7 @@ export function NilaiModal({
                   ) : (
                     <Badge variant="destructive" className="gap-1"><X className="size-3" /> Salah</Badge>
                   )}
+                  <span className="text-muted-foreground">Nilai: {j.nilai}</span>
                 </div>
               ) : (
                 <div className="mt-2 flex flex-col gap-2">

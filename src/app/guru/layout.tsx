@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/auth";
 import { getTahunAjaranAktifLabel } from "@/lib/tahun-ajaran";
 import { SidebarNav, type NavIconKey } from "@/components/sidebar-nav";
 import { TopBar } from "@/components/top-bar";
+import { AppFooter } from "@/components/app-footer";
 
 const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/guru/dashboard", label: "Dashboard", icon: "dashboard" },
@@ -26,6 +27,7 @@ export default async function GuruLayout({ children }: { children: React.ReactNo
         <TopBar tahunAjaranLabel={tahunAjaranLabel} email={profile.email} />
         <main className="flex-1 overflow-x-hidden p-6 md:p-8">
           <div className="mx-auto max-w-6xl">{children}</div>
+          <div className="mx-auto max-w-6xl"><AppFooter /></div>
         </main>
       </div>
     </div>

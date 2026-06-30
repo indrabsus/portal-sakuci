@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export type Role = "admin" | "kajur" | "guru" | "siswa" | "bkk";
+export type Role = "admin" | "kajur" | "guru" | "siswa" | "bkk" | "bk" | "perpus";
 
 export type CurrentProfile = {
   id_profile: string;

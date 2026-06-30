@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/auth";
 import { getTahunAjaranAktifLabel } from "@/lib/tahun-ajaran";
 import { SidebarNav, type NavIconKey } from "@/components/sidebar-nav";
 import { TopBar } from "@/components/top-bar";
+import { AppFooter } from "@/components/app-footer";
 
 const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/siswa/dashboard", label: "Dashboard", icon: "dashboard" },
@@ -12,6 +13,7 @@ const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/siswa/roadmap", label: "Roadmap Belajar", icon: "route" },
   { href: "/siswa/sertifikat", label: "Sertifikat Saya", icon: "award" },
   { href: "/siswa/proyek", label: "Project & Inovasi", icon: "sparkles" },
+  { href: "/siswa/konseling", label: "Konseling AI", icon: "message-circle" },
   { href: "/siswa/ganti-password", label: "Ganti Password", icon: "key-round" },
 ];
 
@@ -26,6 +28,7 @@ export default async function SiswaLayout({ children }: { children: React.ReactN
         <TopBar tahunAjaranLabel={tahunAjaranLabel} email={profile.email} />
         <main className="flex-1 overflow-x-hidden p-6 md:p-8 print:p-0">
           <div className="mx-auto max-w-6xl print:max-w-none">{children}</div>
+          <div className="mx-auto max-w-6xl print:hidden"><AppFooter /></div>
         </main>
       </div>
     </div>

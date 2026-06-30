@@ -24,8 +24,6 @@ import {
   Layers,
   Quote,
 } from "lucide-react";
-import { redirect } from "next/navigation";
-import { getCurrentProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InitialsAvatar } from "@/components/initials-avatar";
@@ -58,9 +56,6 @@ const FOTO_JURUSAN: Record<string, string> = {
 };
 
 export default async function HomePage() {
-  const profile = await getCurrentProfile();
-  if (profile) redirect(`/${profile.role}/dashboard`);
-
   const admin = createAdminClient();
 
   const [
@@ -78,13 +73,15 @@ export default async function HomePage() {
     admin.from("profiles").select("nama_lengkap, id_jurusan").not("id_jurusan", "is", null),
     admin
       .from("sertifikat")
-      .select("id_sertifikat, nilai, tanggal_terbit, siswa(nama_lengkap, foto_url), kompetensi(judul)")
+      .select(
+        "id_sertifikat, nilai, tanggal_terbit, siswa(nama_lengkap, foto_url, siswa_kelas(aktif, kelas(nama_kelas, tingkat))), kompetensi(judul)",
+      )
       .eq("status", "aktif")
       .order("tanggal_terbit", { ascending: false })
       .limit(8),
     admin
       .from("project_siswa")
-      .select("id_project, nama_project, deskripsi, link_youtube, siswa(nama_lengkap, foto_url), kelas(nama_kelas)")
+      .select("id_project, nama_project, deskripsi, link_youtube, siswa(nama_lengkap, foto_url), kelas(nama_kelas, tingkat)")
       .eq("status", "approved")
       .order("created_at", { ascending: false })
       .limit(6),
@@ -129,7 +126,7 @@ export default async function HomePage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="Logo" className="h-20 w-auto object-contain drop-shadow-lg" />
           <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-5xl">{namaSekolah}</h1>
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary-foreground/90 sm:text-base">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/90 sm:text-base">
             Modern <span className="text-white/40">&bull;</span> Profesional <span className="text-white/40">&bull;</span> Religius
           </p>
           <p className="max-w-2xl text-white/85 sm:text-lg">
@@ -148,11 +145,12 @@ export default async function HomePage() {
 
       {/* Stats - overlapping hero */}
       <div className="relative z-10 mx-4 -mt-14 sm:mx-6 sm:-mt-16">
-        <Card className="mx-auto max-w-5xl border-primary/10 shadow-xl shadow-black/5">
+        <Card className="relative mx-auto max-w-5xl overflow-hidden border-primary/10 shadow-xl shadow-black/5">
+          <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary via-accent to-primary" />
           <CardContent className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4 sm:p-6">
             {STATS.map((s) => (
               <div key={s.label} className="flex flex-col items-center gap-1.5 text-center">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
                   <s.icon className="size-4.5" />
                 </div>
                 <p className="text-2xl font-extrabold tracking-tight sm:text-3xl">{s.value}</p>
@@ -256,10 +254,13 @@ export default async function HomePage() {
       </section>
 
       {/* Sambutan Kepala Sekolah */}
-      <section className="relative px-4 py-20 sm:px-6">
+      <section className="relative overflow-hidden px-4 py-20 sm:px-6">
+        <GridPattern />
+        <GlowOrb className="-left-20 top-10 size-72" />
         <div className="mx-auto max-w-4xl">
           <SectionHeading eyebrow="Pimpinan Sekolah" title="Sambutan Kepala Sekolah" subtitle="" />
-          <Card className="relative overflow-hidden shadow-md">
+          <Card className="relative overflow-hidden border-primary/10 shadow-md">
+            <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary via-accent to-primary" />
             <div className="absolute -right-10 -top-10 size-40 rounded-full bg-primary/5" />
             <CardContent className="relative flex flex-col items-center gap-6 pt-6 text-center sm:flex-row sm:items-start sm:text-left">
               <div className="relative shrink-0">
@@ -300,8 +301,14 @@ export default async function HomePage() {
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {(sertifikatList ?? []).map((s) => {
-                const siswa = s.siswa as unknown as { nama_lengkap: string; foto_url: string | null } | null;
+                const siswa = s.siswa as unknown as {
+                  nama_lengkap: string;
+                  foto_url: string | null;
+                  siswa_kelas: { aktif: boolean; kelas: { nama_kelas: string; tingkat: number | null } | null }[] | null;
+                } | null;
                 const kompetensi = s.kompetensi as unknown as { judul: string } | null;
+                const kelas = siswa?.siswa_kelas?.find((sk) => sk.aktif)?.kelas ?? null;
+                const kelasLabel = kelas ? (kelas.tingkat ? `${kelas.tingkat} ${kelas.nama_kelas}` : kelas.nama_kelas) : null;
                 return (
                   <Card key={s.id_sertifikat} className="group shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
                     <CardContent className="flex flex-col items-center gap-2 pt-6 text-center">
@@ -309,6 +316,7 @@ export default async function HomePage() {
                         <InitialsAvatar name={siswa?.nama_lengkap ?? "-"} fotoUrl={siswa?.foto_url} className="size-14 border-2 border-background text-base" />
                       </div>
                       <p className="text-sm font-semibold">{siswa?.nama_lengkap ?? "-"}</p>
+                      {kelasLabel && <p className="text-xs text-muted-foreground">{kelasLabel}</p>}
                       <div className="flex items-center gap-1 text-xs text-primary">
                         <Award className="size-3" />
                         {kompetensi?.judul ?? "-"}
@@ -332,7 +340,8 @@ export default async function HomePage() {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {(projectList ?? []).map((p) => {
                 const siswa = p.siswa as unknown as { nama_lengkap: string; foto_url: string | null } | null;
-                const kelas = p.kelas as unknown as { nama_kelas: string } | null;
+                const kelas = p.kelas as unknown as { nama_kelas: string; tingkat: number | null } | null;
+                const kelasLabel = kelas ? (kelas.tingkat ? `${kelas.tingkat} ${kelas.nama_kelas}` : kelas.nama_kelas) : "-";
                 return (
                   <Card key={p.id_project} className="group overflow-hidden shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
                     {p.link_youtube ? (
@@ -351,7 +360,7 @@ export default async function HomePage() {
                       <p className="line-clamp-2 text-sm text-muted-foreground">{p.deskripsi ?? "-"}</p>
                       <div className="flex items-center gap-2 border-t pt-2">
                         <InitialsAvatar name={siswa?.nama_lengkap ?? "-"} fotoUrl={siswa?.foto_url} className="size-6 text-[10px]" />
-                        <span className="text-xs text-muted-foreground">{siswa?.nama_lengkap ?? "-"} &middot; {kelas?.nama_kelas ?? "-"}</span>
+                        <span className="text-xs text-muted-foreground">{siswa?.nama_lengkap ?? "-"} &middot; {kelasLabel}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -363,14 +372,17 @@ export default async function HomePage() {
       </section>
 
       {/* Ekskul */}
-      <section className="relative bg-muted/30 px-4 py-20 sm:px-6">
+      <section className="relative overflow-hidden bg-muted/30 px-4 py-20 sm:px-6">
+        <GridPattern />
+        <GlowOrb className="-right-24 top-0 size-80" />
         <div className="mx-auto max-w-5xl">
           <SectionHeading eyebrow="Pengembangan Diri" title="Ekstrakurikuler" subtitle="Wadah pengembangan minat dan talenta siswa" />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {EKSKUL.map((item) => (
-              <Card key={item.nama} className="group shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <CardContent className="flex items-start gap-3 pt-6">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+              <Card key={item.nama} className="group relative overflow-hidden border-primary/10 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+                <div className="absolute right-0 top-0 size-16 rounded-bl-3xl bg-primary/5 transition-colors group-hover:bg-primary/10" />
+                <CardContent className="relative flex items-start gap-3 pt-6">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                     <item.icon className="size-4.5" />
                   </div>
                   <div>
@@ -385,14 +397,17 @@ export default async function HomePage() {
       </section>
 
       {/* Fasilitas */}
-      <section id="fasilitas" className="relative px-4 py-20 sm:px-6">
+      <section id="fasilitas" className="relative overflow-hidden px-4 py-20 sm:px-6">
+        <DotPattern />
+        <GlowOrb className="-left-24 bottom-0 size-80" />
         <div className="mx-auto max-w-5xl">
           <SectionHeading eyebrow="Sarana & Prasarana" title="Fasilitas Sekolah" subtitle="Sarana penunjang kegiatan belajar dan ibadah" />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {FASILITAS.map((item) => (
-              <Card key={item.nama} className="group shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <CardContent className="flex items-start gap-3 pt-6">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+              <Card key={item.nama} className="group relative overflow-hidden border-primary/10 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+                <div className="absolute right-0 top-0 size-16 rounded-bl-3xl bg-primary/5 transition-colors group-hover:bg-primary/10" />
+                <CardContent className="relative flex items-start gap-3 pt-6">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                     <item.icon className="size-4.5" />
                   </div>
                   <div>
@@ -430,7 +445,8 @@ export default async function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="relative border-t bg-background px-4 pt-14 pb-8 sm:px-6">
+      <footer className="relative overflow-hidden border-t bg-background px-4 pt-14 pb-8 sm:px-6">
+        <GridPattern className="opacity-[0.04]" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
         <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 sm:grid-cols-3">
           <div className="flex flex-col items-center gap-3 sm:items-start">
@@ -459,6 +475,9 @@ export default async function HomePage() {
         <p className="mt-10 text-center text-xs text-muted-foreground">
           &copy; {new Date().getFullYear()} {namaSekolah}. Seluruh hak cipta dilindungi.
         </p>
+        <p className="mt-1 text-center text-xs text-muted-foreground">
+          Created by Indra Batara, S.Pd.,Gr (IT Dev SMK Sangkuriang 1 Cimahi)
+        </p>
       </footer>
     </div>
   );
@@ -486,6 +505,28 @@ function DotPattern() {
       </defs>
       <rect width="100%" height="100%" fill="url(#dot-pattern)" />
     </svg>
+  );
+}
+
+function GridPattern({ className = "" }: { className?: string }) {
+  return (
+    <svg className={`pointer-events-none absolute inset-0 -z-10 h-full w-full text-primary opacity-[0.06] ${className}`} aria-hidden>
+      <defs>
+        <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M40 0 H0 V40" fill="none" stroke="currentColor" strokeWidth="1" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid-pattern)" />
+    </svg>
+  );
+}
+
+function GlowOrb({ className = "" }: { className?: string }) {
+  return (
+    <div
+      aria-hidden
+      className={`pointer-events-none absolute -z-10 rounded-full bg-gradient-to-br from-primary/30 to-accent/20 blur-3xl ${className}`}
+    />
   );
 }
 

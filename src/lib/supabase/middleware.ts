@@ -7,6 +7,7 @@ const ROLE_PREFIX: Record<string, string> = {
   guru: "/guru",
   siswa: "/siswa",
   bkk: "/bkk",
+  bk: "/bk",
 };
 
 const PUBLIC_PATHS = ["/login", "/aktivasi", "/auth", "/verifikasi"];
@@ -65,8 +66,8 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // User sudah login tapi mengakses /login atau / -> arahkan ke dashboard role-nya
-  if (path === "/login" || path === "/") {
+  // User sudah login tapi mengakses /login -> arahkan ke dashboard role-nya
+  if (path === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = `${ROLE_PREFIX[role]}/dashboard`;
     return NextResponse.redirect(url);

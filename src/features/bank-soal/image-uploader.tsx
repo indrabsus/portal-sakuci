@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { ImagePlus, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { compressImage } from "@/lib/compress-image";
 
 export function ImageUploader({
   value,
@@ -30,20 +31,26 @@ export function ImageUploader({
     }
 
     setUploading(true);
-    const supabase = createClient();
-    const ext = file.name.split(".").pop();
-    const path = `${pathPrefix}/${crypto.randomUUID()}.${ext}`;
+    try {
+      const compressed = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 });
 
-    const { error: uploadError } = await supabase.storage.from("bank-soal").upload(path, file);
-    setUploading(false);
+      const supabase = createClient();
+      const path = `${pathPrefix}/${crypto.randomUUID()}.jpg`;
 
-    if (uploadError) {
-      setError(uploadError.message);
-      return;
+      const { error: uploadError } = await supabase.storage.from("bank-soal").upload(path, compressed, {
+        contentType: "image/jpeg",
+      });
+
+      if (uploadError) {
+        setError(uploadError.message);
+        return;
+      }
+
+      const { data } = supabase.storage.from("bank-soal").getPublicUrl(path);
+      onChange(data.publicUrl);
+    } finally {
+      setUploading(false);
     }
-
-    const { data } = supabase.storage.from("bank-soal").getPublicUrl(path);
-    onChange(data.publicUrl);
   }
 
   return (

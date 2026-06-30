@@ -28,12 +28,12 @@ export default async function ValidasiKompetensiDetailPage({ params }: { params:
 
   const { data: jawabanList } = await supabase
     .from("jawaban_kompetensi_siswa")
-    .select("id_jawaban_kompetensi, id_pengumpulan_kompetensi, jawaban_text, is_benar, nilai, soal_kompetensi(pertanyaan, tipe_soal), opsi_jawaban_kompetensi(label)")
+    .select("id_jawaban_kompetensi, id_pengumpulan_kompetensi, jawaban_text, is_benar, nilai, soal_kompetensi(pertanyaan, pembahasan, tipe_soal), opsi_jawaban_kompetensi(label)")
     .in("id_pengumpulan_kompetensi", idPengumpulanList.length ? idPengumpulanList : [""]);
 
   const jawabanByPengumpulan = new Map<string, JawabanDetail[]>();
   for (const j of jawabanList ?? []) {
-    const soal = j.soal_kompetensi as unknown as { pertanyaan: string; tipe_soal: string } | null;
+    const soal = j.soal_kompetensi as unknown as { pertanyaan: string; pembahasan: string | null; tipe_soal: string } | null;
     const opsi = j.opsi_jawaban_kompetensi as unknown as { label: string } | null;
     const detail: JawabanDetail = {
       id_jawaban: j.id_jawaban_kompetensi,

@@ -16,7 +16,7 @@ type CertificateData = {
 function CircuitOverlay() {
   return (
     <svg
-      className="pointer-events-none absolute inset-0 h-full w-full text-primary opacity-[0.12]"
+      className="pointer-events-none absolute inset-0 h-full w-full text-indigo-700 opacity-[0.12]"
       viewBox="0 0 1000 700"
       preserveAspectRatio="none"
       aria-hidden
@@ -69,16 +69,16 @@ function CornerOrnament({ className }: { className: string }) {
 
 export function CertificateView({ data }: { data: CertificateData }) {
   return (
-    <div className="relative mx-auto aspect-[297/210] w-full max-w-[1100px] overflow-hidden rounded-md bg-white shadow-2xl ring-1 ring-black/5 print:m-0 print:aspect-auto print:h-[210mm] print:w-[297mm] print:max-w-none print:rounded-none print:shadow-none print:ring-0">
+    <div className="relative mx-auto aspect-[297/210] w-full max-w-[1100px] overflow-hidden rounded-md bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5 print:m-0 print:aspect-auto print:h-[210mm] print:w-[297mm] print:max-w-none print:rounded-none print:shadow-none print:ring-0">
       {/* Border elegan */}
-      <div className="absolute inset-[14px] border-[3px] border-double border-primary/40" />
-      <div className="absolute inset-[22px] border border-primary/20" />
+      <div className="absolute inset-[14px] border-[3px] border-double border-indigo-700/40" />
+      <div className="absolute inset-[22px] border border-indigo-700/20" />
 
       {/* Ornamen pojok */}
-      <CornerOrnament className="absolute left-6 top-6 size-10 text-primary/50" />
-      <CornerOrnament className="absolute right-6 top-6 size-10 rotate-90 text-primary/50" />
-      <CornerOrnament className="absolute bottom-6 left-6 size-10 -rotate-90 text-primary/50" />
-      <CornerOrnament className="absolute bottom-6 right-6 size-10 rotate-180 text-primary/50" />
+      <CornerOrnament className="absolute left-6 top-6 size-10 text-indigo-700/50" />
+      <CornerOrnament className="absolute right-6 top-6 size-10 rotate-90 text-indigo-700/50" />
+      <CornerOrnament className="absolute bottom-6 left-6 size-10 -rotate-90 text-indigo-700/50" />
+      <CornerOrnament className="absolute bottom-6 right-6 size-10 rotate-180 text-indigo-700/50" />
 
       <CircuitOverlay />
 
@@ -94,44 +94,44 @@ export function CertificateView({ data }: { data: CertificateData }) {
         <div className="flex w-full flex-col items-center gap-1.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="Logo Sekolah" className="h-14 w-auto object-contain" />
-          <p className="mt-1 text-sm font-bold uppercase tracking-[0.15em] text-foreground">{data.namaSekolah}</p>
-          <div className="mt-1 h-px w-44 bg-primary/40" />
+          <p className="mt-1 text-sm font-bold uppercase tracking-[0.15em] text-neutral-900">{data.namaSekolah}</p>
+          <div className="mt-1 h-px w-44 bg-indigo-700/40" />
         </div>
 
         <div className="flex flex-col items-center gap-2">
-          <h1 className="text-xl font-extrabold uppercase tracking-[0.2em] text-foreground sm:text-2xl">
+          <h1 className="text-xl font-extrabold uppercase tracking-[0.2em] text-neutral-900 sm:text-2xl">
             Sertifikat Kompetensi
           </h1>
-          <p className="text-xs text-muted-foreground sm:text-sm">Dengan ini menyatakan bahwa</p>
-          <p className="font-serif text-3xl font-bold text-primary sm:text-4xl">{data.namaSiswa}</p>
-          <p className="max-w-xl text-xs text-muted-foreground sm:text-sm">
-            telah dinyatakan <span className="font-semibold text-foreground">LULUS</span> dalam uji kompetensi
+          <p className="text-xs text-neutral-500 sm:text-sm">Dengan ini menyatakan bahwa</p>
+          <p className="font-serif text-3xl font-bold text-indigo-700 sm:text-4xl">{data.namaSiswa}</p>
+          <p className="max-w-xl text-xs text-neutral-500 sm:text-sm">
+            telah dinyatakan <span className="font-semibold text-neutral-900">LULUS</span> dalam uji kompetensi
           </p>
-          <p className="text-base font-bold text-foreground sm:text-lg">{data.judulKompetensi}</p>
+          <p className="text-base font-bold text-neutral-900 sm:text-lg">{data.judulKompetensi}</p>
 
           {data.rincianTes.length > 0 && (
-            <div className="mt-1 flex w-full max-w-md flex-col gap-0.5 rounded-lg border border-primary/15 bg-primary/[0.03] px-4 py-2">
+            <div className="mt-1 flex w-full max-w-md flex-col gap-0.5 rounded-lg border border-indigo-700/15 bg-indigo-700/[0.03] px-4 py-2">
               {data.rincianTes.map((t, idx) => (
                 <div key={idx} className="flex items-center justify-between gap-3 text-[11px] sm:text-xs">
-                  <span className="text-muted-foreground">{t.judul}</span>
-                  <span className="font-semibold text-foreground">{t.nilai ?? "-"}</span>
+                  <span className="text-neutral-500">{t.judul}</span>
+                  <span className="font-semibold text-neutral-900">{t.nilai ?? "-"}</span>
                 </div>
               ))}
-              <div className="mt-1 flex items-center justify-between gap-3 border-t border-primary/15 pt-1 text-xs font-bold sm:text-sm">
-                <span className="text-foreground">Nilai Akhir</span>
-                <span className="text-primary">{data.nilai ?? "-"}</span>
+              <div className="mt-1 flex items-center justify-between gap-3 border-t border-indigo-700/15 pt-1 text-xs font-bold sm:text-sm">
+                <span className="text-neutral-900">Nilai Akhir</span>
+                <span className="text-indigo-700">{data.nilai ?? "-"}</span>
               </div>
             </div>
           )}
         </div>
 
         <div className="flex w-full items-end justify-between gap-6">
-          <div className="flex flex-col items-start gap-0.5 text-left text-[11px] text-muted-foreground">
-            <p>No. Sertifikat: <span className="font-mono text-foreground">{data.nomorSertifikat ?? "-"}</span></p>
-            <p>Kode Verifikasi: <span className="font-mono text-foreground">{data.kodeVerifikasi ?? "-"}</span></p>
+          <div className="flex flex-col items-start gap-0.5 text-left text-[11px] text-neutral-500">
+            <p>No. Sertifikat: <span className="font-mono text-neutral-900">{data.nomorSertifikat ?? "-"}</span></p>
+            <p>Kode Verifikasi: <span className="font-mono text-neutral-900">{data.kodeVerifikasi ?? "-"}</span></p>
             <p>
               Tanggal Terbit:{" "}
-              <span className="text-foreground">
+              <span className="text-neutral-900">
                 {data.tanggalTerbit ? new Date(data.tanggalTerbit).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "-"}
               </span>
             </p>
@@ -139,14 +139,14 @@ export function CertificateView({ data }: { data: CertificateData }) {
 
           <div className="flex flex-col items-center gap-1">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={data.qrDataUrl} alt="QR Verifikasi" className="size-16 rounded-md border bg-white p-1" />
-            <p className="text-[9px] text-muted-foreground">Pindai untuk verifikasi</p>
+            <img src={data.qrDataUrl} alt="QR Verifikasi" className="size-16 rounded-md border border-neutral-300 bg-white p-1" />
+            <p className="text-[9px] text-neutral-500">Pindai untuk verifikasi</p>
           </div>
 
           <div className="flex flex-col items-center gap-1 text-center">
-            <p className="font-serif text-2xl italic text-primary">{data.namaKajur ?? ""}</p>
-            <div className="h-px w-36 bg-foreground/40" />
-            <p className="text-xs text-muted-foreground">{data.jabatanKajur ?? "Kepala Jurusan"}</p>
+            <p className="font-serif text-2xl italic text-indigo-700">{data.namaKajur ?? ""}</p>
+            <div className="h-px w-36 bg-neutral-900/40" />
+            <p className="text-xs text-neutral-500">{data.jabatanKajur ?? "Kepala Jurusan"}</p>
           </div>
         </div>
       </div>

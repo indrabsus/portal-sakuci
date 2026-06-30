@@ -1,5 +1,3 @@
-import { Check, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 export type HasilSoal = {
@@ -28,11 +26,6 @@ export function HasilView({ nilaiAkhir, hasil }: { nilaiAkhir: number | null; ha
           {h.tipe_soal === "pg" ? (
             <div className="flex items-center gap-2 text-sm">
               <span className="text-muted-foreground">Jawaban Anda: {h.opsi_label ?? "-"}</span>
-              {h.is_benar ? (
-                <Badge className="gap-1"><Check className="size-3" /> Benar</Badge>
-              ) : (
-                <Badge variant="destructive" className="gap-1"><X className="size-3" /> Salah</Badge>
-              )}
             </div>
           ) : (
             <div className="flex flex-col gap-1">
