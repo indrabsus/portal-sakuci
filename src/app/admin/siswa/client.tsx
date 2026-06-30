@@ -18,11 +18,22 @@ type Siswa = {
   tempat_lahir: string | null;
   tanggal_lahir: string | null;
   agama: string | null;
+  no_hp: string | null;
   aktif: boolean;
   akun_aktif: boolean;
   id_profile: string | null;
   kelas_terkini: string | null;
 };
+
+function formatTtl(tempat: string | null, tanggal: string | null) {
+  const tgl = tanggal
+    ? new Date(tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+    : null;
+  if (tempat && tgl) return `${tempat}, ${tgl}`;
+  if (tgl) return tgl;
+  if (tempat) return tempat;
+  return "-";
+}
 
 export function SiswaClient({ rows }: { rows: Siswa[] }) {
   const router = useRouter();
@@ -74,6 +85,12 @@ export function SiswaClient({ rows }: { rows: Siswa[] }) {
         columns={[
           { key: "nama_lengkap", label: "Nama Lengkap" },
           { key: "nisn", label: "NISN" },
+          {
+            key: "tanggal_lahir",
+            label: "Tempat, Tanggal Lahir",
+            render: (r) => formatTtl(r.tempat_lahir, r.tanggal_lahir),
+          },
+          { key: "no_hp", label: "No. HP", render: (r) => r.no_hp ?? "-" },
           { key: "kelas_terkini", label: "Kelas", render: (r) => r.kelas_terkini ?? "-" },
           { key: "aktif", label: "Status", render: (r) => (r.aktif ? "Aktif" : "Nonaktif") },
           {

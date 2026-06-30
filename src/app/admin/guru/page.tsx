@@ -6,7 +6,7 @@ export default async function GuruPage() {
   const [{ data: guruList }, { data: akunList }] = await Promise.all([
     supabase
       .from("guru")
-      .select("id_guru, nama_lengkap, uid_fp, no_hp, jenkel")
+      .select("id_guru, nama_lengkap, uid_fp, no_hp, jenkel, foto_url")
       .order("nama_lengkap"),
     supabase.from("akun_guru").select("id_guru"),
   ]);

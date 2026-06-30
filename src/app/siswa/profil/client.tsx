@@ -16,15 +16,20 @@ import {
   Award,
   Lightbulb,
   ArrowRight,
+  Phone,
+  Pencil,
+  Check,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { InitialsAvatar } from "@/components/initials-avatar";
 import { YoutubeThumbnail } from "@/components/youtube-thumbnail";
 import { createClient } from "@/lib/supabase/client";
 import { compressImage } from "@/lib/compress-image";
-import { updateFotoSiswa } from "./actions";
+import { updateFotoSiswa, updateNoHpSiswa } from "./actions";
 
 type SertifikatItem = { id_sertifikat: string; judul: string; nilai: number | null; tanggal_terbit: string | null };
 type ProyekItem = { id_project: string; nama_project: string; status: string; link_youtube: string | null };
@@ -46,6 +51,7 @@ export function ProfilClient({
   tempatLahir,
   tanggalLahir,
   agama,
+  noHp,
   kelasNama,
   jurusanNama,
   sertifikatList,
@@ -60,6 +66,7 @@ export function ProfilClient({
   tempatLahir: string | null;
   tanggalLahir: string | null;
   agama: string | null;
+  noHp: string | null;
   kelasNama: string | null;
   jurusanNama: string | null;
   sertifikatList: SertifikatItem[];
@@ -71,6 +78,26 @@ export function ProfilClient({
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(fotoUrl);
   const [error, setError] = useState<string | null>(null);
+
+  const [editingHp, setEditingHp] = useState(false);
+  const [noHpValue, setNoHpValue] = useState(noHp ?? "");
+  const [hpError, setHpError] = useState<string | null>(null);
+  const [hpPending, startHpTransition] = useTransition();
+
+  function handleSaveHp() {
+    setHpError(null);
+    const formData = new FormData();
+    formData.set("no_hp", noHpValue.trim());
+    startHpTransition(async () => {
+      const result = await updateNoHpSiswa(formData);
+      if (result.success) {
+        setEditingHp(false);
+        router.refresh();
+      } else {
+        setHpError(result.message);
+      }
+    });
+  }
 
   async function handleFile(file: File) {
     setError(null);
@@ -217,6 +244,50 @@ export function ProfilClient({
               </div>
             </div>
           ))}
+
+          {/* No HP - editable */}
+          <div className="flex items-start gap-3 rounded-xl border bg-muted/30 p-3 sm:col-span-2">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Phone className="size-4" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs text-muted-foreground">No. HP</p>
+              {editingHp ? (
+                <div className="mt-1 flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={noHpValue}
+                      onChange={(e) => setNoHpValue(e.target.value)}
+                      placeholder="08xxxxxxxxxx"
+                      className="h-8 max-w-[220px] text-sm"
+                      disabled={hpPending}
+                      autoFocus
+                    />
+                    <Button size="icon" variant="ghost" className="size-7 text-emerald-600" disabled={hpPending} onClick={handleSaveHp}>
+                      {hpPending ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" />}
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-7 text-muted-foreground"
+                      disabled={hpPending}
+                      onClick={() => { setEditingHp(false); setNoHpValue(noHp ?? ""); setHpError(null); }}
+                    >
+                      <X className="size-3.5" />
+                    </Button>
+                  </div>
+                  {hpError && <p className="text-xs text-destructive">{hpError}</p>}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">{noHp || "-"}</p>
+                  <Button size="icon" variant="ghost" className="size-6 text-muted-foreground hover:text-primary" onClick={() => setEditingHp(true)}>
+                    <Pencil className="size-3" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
 

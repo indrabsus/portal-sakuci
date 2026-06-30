@@ -6,6 +6,7 @@ import { AppFooter } from "@/components/app-footer";
 
 const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/guru/dashboard", label: "Dashboard", icon: "dashboard" },
+  { href: "/guru/profil", label: "Profil Saya", icon: "user-circle" },
   { href: "/guru/mengajar", label: "Pembagian Mengajar", icon: "school" },
   { href: "/guru/materi", label: "Materi", icon: "book-open" },
   { href: "/guru/tugas", label: "Tugas", icon: "file-text" },

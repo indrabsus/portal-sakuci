@@ -10,7 +10,7 @@ export default async function SiswaProfilPage() {
   const [{ data: siswa }, kelasInfo, { data: sertifikatRaw }, { data: proyekRaw }] = await Promise.all([
     supabase
       .from("siswa")
-      .select("nisn, jenkel, tempat_lahir, tanggal_lahir, agama, foto_url")
+      .select("nisn, jenkel, tempat_lahir, tanggal_lahir, agama, foto_url, no_hp")
       .eq("id_siswa", profile.id_siswa ?? "")
       .single(),
     getSiswaKelasInfo(profile.id_siswa ?? ""),
@@ -56,6 +56,7 @@ export default async function SiswaProfilPage() {
       tempatLahir={siswa?.tempat_lahir ?? null}
       tanggalLahir={siswa?.tanggal_lahir ?? null}
       agama={siswa?.agama ?? null}
+      noHp={siswa?.no_hp ?? null}
       kelasNama={kelasInfo.nama_kelas}
       jurusanNama={jurusanData?.nama_jurusan ?? null}
       sertifikatList={sertifikatList}

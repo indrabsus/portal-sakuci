@@ -9,7 +9,7 @@ export default async function SiswaPage() {
     fetchAllRows((from, to) =>
       supabase
         .from("siswa")
-        .select("id_siswa, nama_lengkap, nisn, jenkel, tempat_lahir, tanggal_lahir, agama, aktif")
+        .select("id_siswa, nama_lengkap, nisn, jenkel, tempat_lahir, tanggal_lahir, agama, no_hp, aktif")
         .order("nama_lengkap")
         .range(from, to),
     ),

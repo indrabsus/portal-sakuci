@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { SimpleCrud } from "@/components/simple-crud";
+import { InitialsAvatar } from "@/components/initials-avatar";
 import { createGuru, updateGuru, deleteGuru } from "./actions";
 
 type Guru = {
@@ -10,6 +11,7 @@ type Guru = {
   uid_fp: string | null;
   no_hp: string | null;
   jenkel: string | null;
+  foto_url: string | null;
   akun_aktif: boolean;
 };
 
@@ -20,7 +22,16 @@ export function GuruClient({ rows }: { rows: Guru[] }) {
       idKey="id_guru"
       rows={rows}
       columns={[
-        { key: "nama_lengkap", label: "Nama Lengkap" },
+        {
+          key: "nama_lengkap",
+          label: "Nama Lengkap",
+          render: (r) => (
+            <div className="flex items-center gap-2.5">
+              <InitialsAvatar name={r.nama_lengkap} fotoUrl={r.foto_url} className="size-8 text-xs" />
+              {r.nama_lengkap}
+            </div>
+          ),
+        },
         { key: "uid_fp", label: "UID FP" },
         { key: "no_hp", label: "No HP" },
         {
