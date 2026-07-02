@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { requireKajurJurusan } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -28,5 +29,9 @@ export async function reviewProjectSiswa(formData: FormData): Promise<ActionResu
     .eq("id_project", idProject);
 
   if (error) return { success: false, message: error.message };
+
+  revalidatePath("/");
+  revalidatePath("/kajur/inovasi-siswa");
+
   return { success: true, message: status === "approved" ? "Project disetujui dan akan tampil di halaman publik." : "Project ditolak." };
 }
