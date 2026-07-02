@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AlertTriangle, MessageCircle } from "lucide-react";
+import { AlertTriangle, MessageCircle, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { deleteKonselingSesiAdmin } from "./actions";
 import type { KonselingSesiRow } from "./types";
 
 const RISIKO_LABEL: Record<string, string> = { rendah: "Risiko Rendah", sedang: "Risiko Sedang", tinggi: "Risiko Tinggi" };
@@ -13,7 +15,7 @@ const RISIKO_VARIANT: Record<string, "secondary" | "default" | "destructive"> = 
   tinggi: "destructive",
 };
 
-export function KonselingListClient({ rows, basePath }: { rows: KonselingSesiRow[]; basePath: string }) {
+export function KonselingListClient({ rows, basePath, canDelete = false }: { rows: KonselingSesiRow[]; basePath: string; canDelete?: boolean }) {
   const router = useRouter();
 
   const sorted = [...rows].sort((a, b) => {
@@ -41,7 +43,7 @@ export function KonselingListClient({ rows, basePath }: { rows: KonselingSesiRow
             <Card
               key={s.id_sesi}
               className={`cursor-pointer shadow-sm transition-shadow hover:shadow-md ${
-                s.tingkat_risiko === "tinggi" ? "border-destructive/40 bg-destructive/[0.03]" : ""
+                s.tingkat_risiko === "tinggi" ? "border-destructive/40 bg-destructive/3" : ""
               }`}
               onClick={() => router.push(`${basePath}/${s.id_sesi}`)}
             >
@@ -65,6 +67,23 @@ export function KonselingListClient({ rows, basePath }: { rows: KonselingSesiRow
                     {s.tingkat_risiko ? RISIKO_LABEL[s.tingkat_risiko] : "Belum Diringkas"}
                   </Badge>
                   <span className="text-xs text-muted-foreground">{s.status === "aktif" ? "Berlangsung" : "Selesai"}</span>
+                  {canDelete && (
+                    <form
+                      action={deleteKonselingSesiAdmin}
+                      onClick={(event) => event.stopPropagation()}
+                      onSubmit={(event) => {
+                        if (!window.confirm("Hapus sesi konseling ini?")) {
+                          event.preventDefault();
+                        }
+                      }}
+                    >
+                      <input type="hidden" name="id_sesi" value={s.id_sesi} />
+                      <Button type="submit" size="sm" variant="destructive" className="h-8 px-2.5">
+                        <Trash2 className="mr-1 size-3.5" />
+                        Hapus
+                      </Button>
+                    </form>
+                  )}
                 </div>
               </CardContent>
             </Card>

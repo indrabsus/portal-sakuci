@@ -30,6 +30,8 @@ import {
   HeartHandshake,
   NotebookPen,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -95,8 +97,12 @@ function NavLinks({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => 
   );
 }
 
-/** Sidebar tetap, hanya tampil di layar md ke atas. */
-export function SidebarNav({ title, items }: { title: string; items: NavItem[] }) {
+/** Sidebar desktop/tablet yang bisa disembunyikan dengan toggle. */
+export function SidebarNav({ title, items, collapsed = false }: { title: string; items: NavItem[]; collapsed?: boolean }) {
+  if (collapsed) {
+    return null;
+  }
+
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r bg-sidebar md:flex">
       <div className="flex h-14 items-center border-b px-5">

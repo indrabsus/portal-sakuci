@@ -8,5 +8,5 @@ export default async function AdminKonselingDetailPage({ params }: { params: Pro
   const { id } = await params;
   const sesi = await getKonselingSesiDetail(id);
   if (!sesi) notFound();
-  return <KonselingDetailView sesi={sesi} />;
+  return <KonselingDetailView sesi={sesi} canDelete />;
 }

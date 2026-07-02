@@ -1,6 +1,8 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { deleteKonselingSesiAdmin } from "./actions";
 import type { KonselingSesiDetail } from "./types";
 
 const RISIKO_LABEL: Record<string, string> = { rendah: "Risiko Rendah", sedang: "Risiko Sedang", tinggi: "Risiko Tinggi" };
@@ -10,15 +12,33 @@ const RISIKO_VARIANT: Record<string, "secondary" | "default" | "destructive"> = 
   tinggi: "destructive",
 };
 
-export function KonselingDetailView({ sesi }: { sesi: KonselingSesiDetail }) {
+export function KonselingDetailView({ sesi, canDelete = false }: { sesi: KonselingSesiDetail; canDelete?: boolean }) {
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{sesi.judul ?? "Sesi Konseling"}</h1>
-        <p className="text-sm text-muted-foreground">
-          {sesi.nama_siswa} &middot;{" "}
-          {sesi.kelas_label} &middot; {new Date(sesi.started_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">{sesi.judul ?? "Sesi Konseling"}</h1>
+          <p className="text-sm text-muted-foreground">
+            {sesi.nama_siswa} &middot;{" "}
+            {sesi.kelas_label} &middot; {new Date(sesi.started_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+          </p>
+        </div>
+        {canDelete && (
+          <form
+            action={deleteKonselingSesiAdmin}
+            onSubmit={(event) => {
+              if (!window.confirm("Hapus sesi konseling ini?")) {
+                event.preventDefault();
+              }
+            }}
+          >
+            <input type="hidden" name="id_sesi" value={sesi.id_sesi} />
+            <Button type="submit" variant="destructive" size="sm">
+              <Trash2 className="mr-1 size-4" />
+              Hapus
+            </Button>
+          </form>
+        )}
       </div>
 
       <Card className={sesi.tingkat_risiko === "tinggi" ? "border-destructive/40" : ""}>

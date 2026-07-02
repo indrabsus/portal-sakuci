@@ -60,13 +60,16 @@ export async function aktivasiGuruAction(formData: FormData): Promise<ActionResu
     return { success: false, message: createError?.message ?? "Gagal membuat akun. Email mungkin sudah dipakai." };
   }
 
-  const { error: profileError } = await admin.from("profiles").insert({
-    id_profile: created.user.id,
-    id_role: idRoleGuru,
-    nama_lengkap: guru.nama_lengkap,
-    email,
-    no_hp: noHp,
-  });
+  const { error: profileError } = await admin.from("profiles").upsert(
+    {
+      id_profile: created.user.id,
+      id_role: idRoleGuru,
+      nama_lengkap: guru.nama_lengkap,
+      email,
+      no_hp: noHp,
+    },
+    { onConflict: "id_profile" }
+  );
 
   if (profileError) {
     await admin.auth.admin.deleteUser(created.user.id);
@@ -141,12 +144,15 @@ export async function aktivasiSiswaAction(formData: FormData): Promise<ActionRes
     return { success: false, message: createError?.message ?? "Gagal membuat akun. Email mungkin sudah dipakai." };
   }
 
-  const { error: profileError } = await admin.from("profiles").insert({
-    id_profile: created.user.id,
-    id_role: idRoleSiswa,
-    nama_lengkap: siswa.nama_lengkap,
-    email,
-  });
+  const { error: profileError } = await admin.from("profiles").upsert(
+    {
+      id_profile: created.user.id,
+      id_role: idRoleSiswa,
+      nama_lengkap: siswa.nama_lengkap,
+      email,
+    },
+    { onConflict: "id_profile" }
+  );
 
   if (profileError) {
     await admin.auth.admin.deleteUser(created.user.id);

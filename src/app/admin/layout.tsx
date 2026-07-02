@@ -1,8 +1,7 @@
 import { requireRole } from "@/lib/auth";
 import { getTahunAjaranAktifLabel } from "@/lib/tahun-ajaran";
-import { SidebarNav, type NavIconKey } from "@/components/sidebar-nav";
-import { TopBar } from "@/components/top-bar";
-import { AppFooter } from "@/components/app-footer";
+import { AppShell } from "@/components/app-shell";
+import type { NavIconKey } from "@/components/sidebar-nav";
 
 const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/admin/dashboard", label: "Dashboard", icon: "dashboard" },
@@ -25,15 +24,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const tahunAjaranLabel = await getTahunAjaranAktifLabel();
 
   return (
-    <div className="flex min-h-screen">
-      <SidebarNav title="Admin" items={NAV_ITEMS} />
-      <div className="flex flex-1 flex-col bg-muted/30">
-        <TopBar tahunAjaranLabel={tahunAjaranLabel} email={profile.email} navTitle="Admin" navItems={NAV_ITEMS} />
-        <main className="flex-1 overflow-x-hidden p-4 md:p-8">
-          <div className="mx-auto max-w-6xl">{children}</div>
-          <div className="mx-auto max-w-6xl"><AppFooter /></div>
-        </main>
-      </div>
-    </div>
+    <AppShell title="Admin" navItems={NAV_ITEMS} tahunAjaranLabel={tahunAjaranLabel} email={profile.email}>
+      {children}
+    </AppShell>
   );
 }
