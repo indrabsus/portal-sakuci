@@ -42,10 +42,10 @@ export function KonselingListClient({ rows, basePath, canDelete = false }: { row
           {sorted.map((s) => (
             <Card
               key={s.id_sesi}
-              className={`cursor-pointer shadow-sm transition-shadow hover:shadow-md ${
+              className={`shadow-sm transition-shadow ${canDelete ? "" : "cursor-pointer hover:shadow-md"} ${
                 s.tingkat_risiko === "tinggi" ? "border-destructive/40 bg-destructive/3" : ""
               }`}
-              onClick={() => router.push(`${basePath}/${s.id_sesi}`)}
+              {...(!canDelete ? { onClick: () => router.push(`${basePath}/${s.id_sesi}`) } : {})}
             >
               <CardContent className="flex items-center gap-3 pt-6">
                 <div

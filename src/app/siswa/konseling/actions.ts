@@ -71,9 +71,10 @@ export async function kirimPesanKonseling(formData: FormData): Promise<ActionRes
     .order("created_at", { ascending: true });
 
   const riwayat = (riwayatRaw ?? []) as { pengirim: "siswa" | "ai"; isi: string }[];
+  const siswaNama = profile.nama_lengkap?.trim() || undefined;
 
   try {
-    const balasan = await balasKonselingAI(riwayat);
+    const balasan = await balasKonselingAI(riwayat, siswaNama);
     const { error: aiInsertError } = await supabase
       .from("konseling_pesan")
       .insert({ id_sesi: idSesi, pengirim: "ai", isi: balasan });

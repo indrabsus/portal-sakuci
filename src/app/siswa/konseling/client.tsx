@@ -1,8 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { MessageCircle, Plus } from "lucide-react";
+import { Loader2, MessageCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,12 +13,18 @@ type SesiRow = { id_sesi: string; judul: string | null; status: string; started_
 export function KonselingClient({ rows }: { rows: SesiRow[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [starting, setStarting] = useState(false);
 
-  function handleMulai() {
+  async function handleMulai() {
+    setStarting(true);
     startTransition(async () => {
-      const result = await mulaiSesiKonseling();
-      if (result.success && result.idSesi) {
-        router.push(`/siswa/konseling/${result.idSesi}`);
+      try {
+        const result = await mulaiSesiKonseling();
+        if (result.success && result.idSesi) {
+          router.push(`/siswa/konseling/${result.idSesi}`);
+        }
+      } finally {
+        setStarting(false);
       }
     });
   }
@@ -32,8 +38,16 @@ export function KonselingClient({ rows }: { rows: SesiRow[] }) {
             Tempat aman untuk curhat. Percakapanmu akan diringkas untuk membantu guru BK memahami kondisimu.
           </p>
         </div>
-        <Button onClick={handleMulai} disabled={isPending} className="gap-1.5">
-          <Plus className="size-4" /> Mulai Sesi Baru
+        <Button onClick={handleMulai} disabled={isPending || starting} className="gap-1.5">
+          {starting || isPending ? (
+            <>
+              <Loader2 className="size-4 animate-spin" /> Memulai...
+            </>
+          ) : (
+            <>
+              <Plus className="size-4" /> Mulai Sesi Baru
+            </>
+          )}
         </Button>
       </div>
 

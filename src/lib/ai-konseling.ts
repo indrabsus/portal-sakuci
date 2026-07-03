@@ -21,11 +21,15 @@ function getConfig() {
   };
 }
 
-export async function balasKonselingAI(riwayat: ChatMessage[]): Promise<string> {
+export async function balasKonselingAI(riwayat: ChatMessage[], siswaNama?: string): Promise<string> {
   const { baseUrl, model } = getConfig();
 
+  const prompt = siswaNama
+    ? `${SYSTEM_PROMPT}\nGunakan nama siswa ini secara sopan dalam balasan: ${siswaNama}. Jangan memanggil siswa 'Sakuci'.`
+    : SYSTEM_PROMPT;
+
   const messages = [
-    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: prompt },
     ...riwayat.map((m) => ({ role: m.pengirim === "siswa" ? "user" : "assistant", content: m.isi })),
   ];
 

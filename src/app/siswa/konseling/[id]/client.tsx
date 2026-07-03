@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Send, CheckCircle2 } from "lucide-react";
+import { Send, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,7 @@ export function ChatClient({
   const [status, setStatus] = useState(statusAwal);
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   function scrollToBottom() {
@@ -39,6 +40,10 @@ export function ChatClient({
     setError(null);
     setPesan((prev) => [...prev, { id_pesan: `temp-${Date.now()}`, pengirim: "siswa", isi }]);
     setInput("");
+    setError(null);
+    setIsTyping(true);
+    const typingId = `typing-${Date.now()}`;
+    setPesan((prev) => [...prev, { id_pesan: typingId, pengirim: "ai", isi: "Sedang mengetik..." }]);
     scrollToBottom();
 
     startTransition(async () => {
@@ -46,6 +51,9 @@ export function ChatClient({
       formData.set("id_sesi", idSesi);
       formData.set("isi", isi);
       const result = await kirimPesanKonseling(formData);
+      setIsTyping(false);
+      setPesan((prev) => prev.filter((p) => p.id_pesan !== typingId));
+
       if (!result.success) {
         setError(result.message);
         if (result.sesiBerakhir) setStatus("selesai");
@@ -132,11 +140,20 @@ export function ChatClient({
               }
             }}
             placeholder="Tulis ceritamu di sini..."
-            className="min-h-[3rem] flex-1 resize-none"
-            disabled={isPending}
+            className="min-h-12 flex-1 resize-none"
+            disabled={isPending || isTyping}
           />
-          <Button onClick={handleKirim} disabled={isPending || !input.trim()} className="gap-1.5">
-            <Send className="size-4" />
+          <Button onClick={handleKirim} disabled={isPending || isTyping || !input.trim()} className="gap-1.5">
+            {isTyping || isPending ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                <span>Sedang mengetik...</span>
+              </>
+            ) : (
+              <>
+                <Send className="size-4" />
+              </>
+            )}
           </Button>
         </div>
       ) : (
