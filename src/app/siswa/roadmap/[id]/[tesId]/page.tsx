@@ -2,17 +2,24 @@ import { notFound, redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getKompetensiLockInfo } from "@/lib/kompetensi-progress";
 import { TesFormClient, type SoalForm } from "./tes-form";
 import { HasilView, type HasilSoal } from "@/app/siswa/tugas/[id]/hasil-view";
 
 export default async function SiswaTesKompetensiPage({ params }: { params: Promise<{ id: string; tesId: string }> }) {
   const profile = await requireRole(["siswa"]);
-  const { tesId } = await params;
+  const { id: idKompetensi, tesId } = await params;
   const idSiswa = profile.id_siswa;
   if (!idSiswa) redirect("/login");
 
   const supabase = await createClient();
   const admin = createAdminClient();
+
+  // Check if kompetensi is locked
+  const lockInfo = await getKompetensiLockInfo(supabase, idSiswa, idKompetensi);
+  if (lockInfo?.isLocked) {
+    redirect(`/siswa/roadmap/${idKompetensi}`);
+  }
 
   const { data: tes } = await supabase
     .from("kompetensi_tugas")
@@ -49,7 +56,7 @@ export default async function SiswaTesKompetensiPage({ params }: { params: Promi
       nilai: j.nilai ?? 0,
     }));
 
-    body = <HasilView nilaiAkhir={pengumpulan.nilai} hasil={hasil} />;
+    body = <HasilView nilaiAkhir={pengumpulan.nilai} hasil={hasil} status={pengumpulan.status} />;
   } else {
     const { data: soalRaw } = await admin
       .from("kompetensi_tugas_soal")
@@ -80,13 +87,25 @@ export default async function SiswaTesKompetensiPage({ params }: { params: Promi
     body = <TesFormClient idKompetensiTugas={tesId} soalList={soalList} />;
   }
 
+  const backUrl = `/siswa/roadmap/${idKompetensi}`;
+
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{tes.judul}</h1>
-        {tes.deskripsi && <p className="text-sm text-muted-foreground">{tes.deskripsi}</p>}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold tracking-tight">{tes.judul}</h1>
+          {tes.deskripsi && <p className="text-sm text-muted-foreground">{tes.deskripsi}</p>}
+        </div>
       </div>
       {body}
+      <div className="flex gap-2 pt-4">
+        <a
+          href={backUrl}
+          className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+        >
+          ← Kembali ke Roadmap
+        </a>
+      </div>
     </div>
   );
 }

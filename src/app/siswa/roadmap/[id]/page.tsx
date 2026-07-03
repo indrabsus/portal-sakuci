@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getKompetensiLockInfo } from "@/lib/kompetensi-progress";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AlertCircle } from "lucide-react";
 
 const STATUS_LABEL: Record<string, string> = {
   belum: "Belum Dikerjakan",
@@ -28,6 +30,10 @@ export default async function SiswaRoadmapDetailPage({ params }: { params: Promi
 
   if (!kompetensi) notFound();
 
+  // Check if this kompetensi is locked
+  const lockInfo = await getKompetensiLockInfo(supabase, profile.id_siswa ?? "", id);
+  const isLocked = lockInfo?.isLocked ?? false;
+
   const { data: tesList } = await supabase
     .from("kompetensi_tugas")
     .select("id_kompetensi_tugas, judul, deadline, status")
@@ -49,8 +55,25 @@ export default async function SiswaRoadmapDetailPage({ params }: { params: Promi
       <div>
         <h1 className="text-2xl font-bold tracking-tight">{kompetensi.judul}</h1>
         {kompetensi.deskripsi && <p className="text-sm text-muted-foreground">{kompetensi.deskripsi}</p>}
-        <p className="text-xs text-muted-foreground">Syarat lulus: nilai &ge; {kompetensi.syarat_lulus}</p>
+        <p className="text-xs text-muted-foreground">Syarat lulus: nilai ≥ {kompetensi.syarat_lulus}</p>
       </div>
+
+      {isLocked && lockInfo?.prevKompetensi && (
+        <Card className="border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <div className="flex gap-3">
+            <AlertCircle className="size-5 flex-shrink-0 text-amber-600 mt-0.5" />
+            <div className="flex flex-col gap-1">
+              <p className="font-medium text-amber-900">Kompetensi ini masih terkunci</p>
+              <p className="text-sm text-amber-800">
+                Anda harus menyelesaikan dan lulus kompetensi "<strong>{lockInfo.prevKompetensi.judul}</strong>" terlebih dahulu.
+              </p>
+              <p className="text-xs text-amber-700 mt-2">
+                Status: <Badge variant="secondary">{lockInfo.prevKompetensi.status || "Belum Mulai"}</Badge>
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       <Card className="overflow-hidden p-0 shadow-sm">
         <div className="overflow-x-auto">
@@ -75,7 +98,7 @@ export default async function SiswaRoadmapDetailPage({ params }: { params: Promi
                 const status = p?.status ?? "belum";
                 const sudahFinal = ["selesai", "menunggu_acc", "lulus", "tidak_lulus"].includes(status);
                 return (
-                  <TableRow key={t.id_kompetensi_tugas} className="hover:bg-accent/40">
+                  <TableRow key={t.id_kompetensi_tugas} className={`hover:bg-accent/40 ${isLocked ? "opacity-50" : ""}`}>
                     <TableCell>{t.judul}</TableCell>
                     <TableCell>{t.deadline ? new Date(t.deadline).toLocaleDateString("id-ID") : "-"}</TableCell>
                     <TableCell>
@@ -83,11 +106,15 @@ export default async function SiswaRoadmapDetailPage({ params }: { params: Promi
                         {STATUS_LABEL[status] ?? status}
                       </Badge>
                     </TableCell>
-                    <TableCell>{p?.nilai ?? "-"}</TableCell>
+                    <TableCell>{(status === "lulus" || status === "tidak_lulus") && p?.nilai ? p.nilai : "-"}</TableCell>
                     <TableCell className="text-right">
-                      <Link href={`/siswa/roadmap/${id}/${t.id_kompetensi_tugas}`} className="text-sm text-primary underline-offset-4 hover:underline">
-                        {sudahFinal ? "Lihat" : "Kerjakan"}
-                      </Link>
+                      {isLocked ? (
+                        <span className="text-xs text-muted-foreground cursor-not-allowed">Terkunci</span>
+                      ) : (
+                        <Link href={`/siswa/roadmap/${id}/${t.id_kompetensi_tugas}`} className="text-sm text-primary underline-offset-4 hover:underline">
+                          {sudahFinal ? "Lihat" : "Kerjakan"}
+                        </Link>
+                      )}
                     </TableCell>
                   </TableRow>
                 );

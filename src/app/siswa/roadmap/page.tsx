@@ -2,9 +2,11 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getSiswaKelasInfo } from "@/lib/siswa";
+import { isKompetensiLocked } from "@/lib/kompetensi-progress";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Lock } from "lucide-react";
 
 const STATUS_LABEL: Record<string, string> = {
   belum: "Belum Mulai",
@@ -18,13 +20,18 @@ export default async function SiswaRoadmapPage() {
   const supabase = await createClient();
   const kelasInfo = await getSiswaKelasInfo(profile.id_siswa ?? "");
 
-  const { data: kompetensiList } = await supabase
+  const kompetensiQuery = supabase
     .from("kompetensi")
     .select("id_kompetensi, judul, tingkat, urutan, syarat_lulus, id_jurusan")
     .eq("aktif", true)
+    .order("tingkat")
     .order("urutan");
 
-  const relevan = (kompetensiList ?? []).filter((k) => !k.id_jurusan || k.id_jurusan === kelasInfo.id_jurusan);
+  if (kelasInfo.tingkat) kompetensiQuery.lte("tingkat", kelasInfo.tingkat);
+  if (kelasInfo.id_jurusan) kompetensiQuery.eq("id_jurusan", kelasInfo.id_jurusan);
+
+  const { data: kompetensiList } = await kompetensiQuery;
+  const relevan = kompetensiList ?? [];
 
   const { data: progresList } = await supabase
     .from("progres_kompetensi")
@@ -32,6 +39,13 @@ export default async function SiswaRoadmapPage() {
     .eq("id_siswa", profile.id_siswa ?? "");
 
   const progresMap = new Map((progresList ?? []).map((p) => [p.id_kompetensi, p]));
+
+  // Check lock status for each kompetensi
+  const lockStatusMap = new Map<string, boolean>();
+  for (const k of relevan) {
+    const isLocked = await isKompetensiLocked(supabase, profile.id_siswa ?? "", k.id_kompetensi);
+    lockStatusMap.set(k.id_kompetensi, isLocked);
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -62,21 +76,31 @@ export default async function SiswaRoadmapPage() {
               {relevan.map((k) => {
                 const p = progresMap.get(k.id_kompetensi);
                 const status = p?.status ?? "belum";
+                const isLocked = lockStatusMap.get(k.id_kompetensi) ?? false;
                 return (
-                  <TableRow key={k.id_kompetensi} className="hover:bg-accent/40">
+                  <TableRow key={k.id_kompetensi} className={`hover:bg-accent/40 ${isLocked ? "opacity-60" : ""}`}>
                     <TableCell>{k.urutan}</TableCell>
-                    <TableCell>{k.judul}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {k.judul}
+                        {isLocked && <Lock className="size-4 text-muted-foreground" />}
+                      </div>
+                    </TableCell>
                     <TableCell>{k.syarat_lulus}</TableCell>
-                    <TableCell>{p?.nilai ?? "-"}</TableCell>
+                    <TableCell>{(status === "lulus" || status === "tidak_lulus") && p?.nilai ? p.nilai : "-"}</TableCell>
                     <TableCell>
                       <Badge variant={status === "lulus" ? "default" : status === "tidak_lulus" ? "destructive" : "secondary"}>
                         {STATUS_LABEL[status] ?? status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Link href={`/siswa/roadmap/${k.id_kompetensi}`} className="text-sm text-primary underline-offset-4 hover:underline">
-                        Lihat
-                      </Link>
+                      {isLocked ? (
+                        <span className="text-xs text-muted-foreground">Terkunci</span>
+                      ) : (
+                        <Link href={`/siswa/roadmap/${k.id_kompetensi}`} className="text-sm text-primary underline-offset-4 hover:underline">
+                          Lihat
+                        </Link>
+                      )}
                     </TableCell>
                   </TableRow>
                 );

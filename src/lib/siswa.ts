@@ -16,5 +16,6 @@ export async function getSiswaKelasInfo(idSiswa: string) {
     id_tahun_ajaran: data?.id_tahun_ajaran ?? null,
     nama_kelas: kelas ? (kelas.tingkat ? `${kelas.tingkat} ${kelas.nama_kelas}` : kelas.nama_kelas) : null,
     id_jurusan: kelas?.id_jurusan ?? null,
+    tingkat: kelas?.tingkat ?? null,
   };
 }

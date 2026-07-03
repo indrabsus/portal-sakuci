@@ -27,7 +27,7 @@ export default async function SertifikatPage() {
       supabase
         .from("sertifikat")
         .select("id_sertifikat, nomor_sertifikat, nilai, tanggal_terbit, status, id_siswa, id_kompetensi, siswa(nama_lengkap), kompetensi(judul)")
-        .in("id_kompetensi", safeIds)
+        .eq("id_jurusan", profile.id_jurusan)
         .order("tanggal_terbit", { ascending: false })
         .range(from, to),
     ),
@@ -52,7 +52,7 @@ export default async function SertifikatPage() {
     id_sertifikat: s.id_sertifikat,
     nomor_sertifikat: s.nomor_sertifikat,
     nama_siswa: (s.siswa as unknown as { nama_lengkap: string } | null)?.nama_lengkap ?? "-",
-    judul_kompetensi: (s.kompetensi as unknown as { judul: string } | null)?.judul ?? "-",
+    judul_kompetensi: (s.kompetensi as unknown as { judul: string } | null)?.judul ?? "(Kompetensi dihapus)",
     nilai: s.nilai,
     tanggal_terbit: s.tanggal_terbit,
     status: s.status,

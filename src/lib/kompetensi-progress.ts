@@ -133,3 +133,106 @@ export async function recomputeProgresKompetensi(
       .upsert({ id_siswa: idSiswa, id_kompetensi: idKompetensi, status: "proses", nilai: rataRata }, { onConflict: "id_siswa,id_kompetensi" });
   }
 }
+
+/**
+ * Check if a kompetensi is locked for a student. A kompetensi is locked if
+ * there are any previous kompetensi (lower urutan) that are not yet "lulus".
+ * The first kompetensi (urutan = 1 or minimum) is never locked.
+ */
+export async function isKompetensiLocked(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: SupabaseClient<any, any, any>,
+  idSiswa: string,
+  idKompetensi: string,
+): Promise<boolean> {
+  // Get the urutan of the target kompetensi
+  const { data: targetKompetensi } = await supabase
+    .from("kompetensi")
+    .select("urutan")
+    .eq("id_kompetensi", idKompetensi)
+    .single();
+
+  if (!targetKompetensi || targetKompetensi.urutan === 1) return false;
+
+  // Get all previous kompetensi (lower urutan) that are active
+  const { data: prevKompetensiList } = await supabase
+    .from("kompetensi")
+    .select("id_kompetensi")
+    .lt("urutan", targetKompetensi.urutan)
+    .eq("aktif", true);
+
+  if (!prevKompetensiList || prevKompetensiList.length === 0) return false;
+
+  const prevIdList = prevKompetensiList.map((k: { id_kompetensi: string }) => k.id_kompetensi);
+
+  // Check progress of all previous kompetensi
+  const { data: progresSebelumnya } = await supabase
+    .from("progres_kompetensi")
+    .select("id_kompetensi, status")
+    .eq("id_siswa", idSiswa)
+    .in("id_kompetensi", prevIdList);
+
+  const progresMap = new Map((progresSebelumnya ?? []).map((p) => [p.id_kompetensi, p.status]));
+
+  // Kompetensi is locked if ANY previous kompetensi is NOT "lulus"
+  return prevIdList.some((id: string) => progresMap.get(id) !== "lulus");
+}
+
+/**
+ * Get info about locked status and required previous kompetensi
+ */
+export async function getKompetensiLockInfo(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: SupabaseClient<any, any, any>,
+  idSiswa: string,
+  idKompetensi: string,
+): Promise<{ isLocked: boolean; prevKompetensi?: { id_kompetensi: string; judul: string; status: string } } | null> {
+  // Get target kompetensi
+  const { data: targetKompetensi } = await supabase
+    .from("kompetensi")
+    .select("urutan")
+    .eq("id_kompetensi", idKompetensi)
+    .single();
+
+  if (!targetKompetensi) return null;
+
+  if (targetKompetensi.urutan === 1) {
+    return { isLocked: false };
+  }
+
+  // Get immediate previous kompetensi (urutan - 1)
+  const { data: prevKompetensi } = await supabase
+    .from("kompetensi")
+    .select("id_kompetensi, judul")
+    .eq("urutan", targetKompetensi.urutan - 1)
+    .eq("aktif", true)
+    .single();
+
+  if (!prevKompetensi) {
+    return { isLocked: false };
+  }
+
+  // Get progress of previous kompetensi
+  const { data: progres } = await supabase
+    .from("progres_kompetensi")
+    .select("status")
+    .eq("id_siswa", idSiswa)
+    .eq("id_kompetensi", prevKompetensi.id_kompetensi)
+    .maybeSingle();
+
+  const status = progres?.status ?? "belum";
+  const isLocked = status !== "lulus";
+
+  if (isLocked) {
+    return {
+      isLocked: true,
+      prevKompetensi: {
+        id_kompetensi: prevKompetensi.id_kompetensi,
+        judul: prevKompetensi.judul,
+        status,
+      },
+    };
+  }
+
+  return { isLocked: false };
+}

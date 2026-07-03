@@ -27,10 +27,10 @@ async function verifySertifikatOwnership(
 ) {
   const { data } = await supabase
     .from("sertifikat")
-    .select("kompetensi(id_jurusan)")
+    .select("id_jurusan")
     .eq("id_sertifikat", idSertifikat)
     .single();
-  return (data?.kompetensi as unknown as { id_jurusan: string } | null)?.id_jurusan === idJurusan;
+  return data?.id_jurusan === idJurusan;
 }
 
 export async function terbitkanSertifikat(formData: FormData): Promise<ActionResult> {
@@ -58,6 +58,7 @@ export async function terbitkanSertifikat(formData: FormData): Promise<ActionRes
     nomor_sertifikat: nomorSertifikat,
     id_siswa: idSiswa,
     id_kompetensi: idKompetensi,
+    id_jurusan: profile.id_jurusan,
     nilai,
     kode_verifikasi: kodeVerifikasi,
     diterbitkan_oleh: profile.id_profile,
