@@ -138,6 +138,18 @@ export function FloatingChat({ currentUserId }: { currentUserId: string }) {
     loadList()
   }, [loadList])
 
+  // Sync open state ke ChatNotifBell via CustomEvent
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent(open ? 'chat:opened' : 'chat:closed'))
+  }, [open])
+
+  // Listen event dari ChatNotifBell / toast action
+  useEffect(() => {
+    const handler = () => { setOpen(true); setView('list'); loadList() }
+    window.addEventListener('chat:open', handler)
+    return () => window.removeEventListener('chat:open', handler)
+  }, [loadList])
+
   // Realtime: pesan masuk dari percakapan manapun
   useEffect(() => {
     const channel = supabase
@@ -445,7 +457,7 @@ export function FloatingChat({ currentUserId }: { currentUserId: string }) {
 
       {/* Toggle button */}
       <button
-        onClick={() => { setOpen(v => !v); if (!open) { setView('list'); loadList() } }}
+        onClick={() => setOpen(v => !v)}
         className="w-13 h-13 bg-indigo-600 hover:bg-indigo-500 rounded-full shadow-lg shadow-indigo-900/40 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 relative"
         aria-label="Buka chat"
       >

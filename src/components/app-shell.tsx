@@ -4,6 +4,8 @@ import { useState } from "react";
 import { AppFooter } from "@/components/app-footer";
 import { SidebarNav, type NavItem } from "@/components/sidebar-nav";
 import { TopBar } from "@/components/top-bar";
+import { FloatingChat } from "@/features/chat/floating-chat";
+import { ChatNotifBell } from "@/features/chat/chat-notif-bell";
 
 export function AppShell({
   title,
@@ -11,6 +13,7 @@ export function AppShell({
   tahunAjaranLabel,
   email,
   children,
+  currentUserId,
   mainClassName = "flex-1 overflow-x-hidden p-4 md:p-8 print:p-0",
   contentClassName = "mx-auto max-w-6xl print:max-w-none",
   footerClassName = "mx-auto max-w-6xl print:hidden",
@@ -20,6 +23,7 @@ export function AppShell({
   tahunAjaranLabel: string | null;
   email: string | null;
   children: React.ReactNode;
+  currentUserId?: string;
   mainClassName?: string;
   contentClassName?: string;
   footerClassName?: string;
@@ -37,6 +41,7 @@ export function AppShell({
           navItems={navItems}
           isSidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={() => setSidebarCollapsed((value) => !value)}
+          notifSlot={currentUserId ? <ChatNotifBell currentUserId={currentUserId} /> : undefined}
         />
         <main className={mainClassName}>
           <div className={contentClassName}>{children}</div>
@@ -45,6 +50,7 @@ export function AppShell({
           </div>
         </main>
       </div>
+      {currentUserId && <FloatingChat currentUserId={currentUserId} />}
     </div>
   );
 }

@@ -2,7 +2,6 @@ import { requireRole } from "@/lib/auth";
 import { getTahunAjaranAktifLabel } from "@/lib/tahun-ajaran";
 import { AppShell } from "@/components/app-shell";
 import type { NavIconKey } from "@/components/sidebar-nav";
-import { FloatingChat } from "@/features/chat/floating-chat";
 
 const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/guru/dashboard", label: "Dashboard", icon: "dashboard" },
@@ -22,9 +21,8 @@ export default async function GuruLayout({ children }: { children: React.ReactNo
   const tahunAjaranLabel = await getTahunAjaranAktifLabel();
 
   return (
-    <AppShell title="Guru" navItems={NAV_ITEMS} tahunAjaranLabel={tahunAjaranLabel} email={profile.email}>
+    <AppShell title="Guru" navItems={NAV_ITEMS} tahunAjaranLabel={tahunAjaranLabel} email={profile.email} currentUserId={profile.id_profile}>
       {children}
-      <FloatingChat currentUserId={profile.id_profile} />
     </AppShell>
   );
 }

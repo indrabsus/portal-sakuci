@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TopLoadingBar } from "@/components/top-loading-bar";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const fontSans = Plus_Jakarta_Sans({
@@ -40,6 +41,7 @@ export default function RootLayout({
         <ThemeProvider>
           <TopLoadingBar />
           {children}
+          <Toaster position="top-right" richColors />
         </ThemeProvider>
       </body>
     </html>

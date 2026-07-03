@@ -13,6 +13,7 @@ export function TopBar({
   navItems,
   isSidebarCollapsed = false,
   onToggleSidebar,
+  notifSlot,
 }: {
   tahunAjaranLabel: string | null;
   email: string | null;
@@ -20,6 +21,7 @@ export function TopBar({
   navItems: NavItem[];
   isSidebarCollapsed?: boolean;
   onToggleSidebar?: () => void;
+  notifSlot?: React.ReactNode;
 }) {
   return (
     <header className="flex h-14 items-center justify-between gap-2 border-b bg-background/80 px-3 backdrop-blur-sm sm:px-6">
@@ -48,6 +50,7 @@ export function TopBar({
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        {notifSlot}
         <ThemeToggle />
         {email && <span className="hidden max-w-40 truncate text-sm text-muted-foreground md:inline">{email}</span>}
         <form action={logoutAction}>
