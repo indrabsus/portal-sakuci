@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback, useTransition } from 'react'
+import { useEffect, useRef, useState, useCallback, useTransition, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { MessageCircle, X, ArrowLeft, Send, Search, Loader2 } from 'lucide-react'
 import {
@@ -115,7 +115,8 @@ export function FloatingChat({ currentUserId }: { currentUserId: string }) {
 
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  const supabase = createClient()
+  // useMemo agar referensi stabil — mencegah realtime channel dihancurkan tiap re-render
+  const supabase = useMemo(() => createClient(), [])
 
   // Hitung total unread badge
   const refreshUnread = useCallback(async () => {
@@ -145,7 +146,13 @@ export function FloatingChat({ currentUserId }: { currentUserId: string }) {
 
   // Listen event dari ChatNotifBell / toast action
   useEffect(() => {
-    const handler = () => { setOpen(true); setView('list'); loadList() }
+    const handler = () => {
+      setOpen(true)
+      setView('list')
+      setActivePercakapan(null)
+      setPesan([])
+      loadList()
+    }
     window.addEventListener('chat:open', handler)
     return () => window.removeEventListener('chat:open', handler)
   }, [loadList])
@@ -199,6 +206,7 @@ export function FloatingChat({ currentUserId }: { currentUserId: string }) {
 
   const openThread = async (p: Percakapan) => {
     setActivePercakapan(p)
+    setPesan([])          // bersihkan pesan percakapan sebelumnya dulu
     setView('thread')
     setLoadingThread(true)
     const msgs = await getPesan(p.id)
@@ -224,6 +232,7 @@ export function FloatingChat({ currentUserId }: { currentUserId: string }) {
       unread_count: 0,
     }
     setActivePercakapan(fakePercakapan)
+    setPesan([])          // bersihkan sebelum fetch
     setView('thread')
     setSearchQuery('')
     setSearchResults([])
@@ -250,7 +259,14 @@ export function FloatingChat({ currentUserId }: { currentUserId: string }) {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 30)
 
     startSending(async () => {
-      await kirimPesan(activePercakapan.id, text)
+      const result = await kirimPesan(activePercakapan.id, text)
+      if (result && 'error' in result) {
+        // Hapus optimistic message, tampilkan error
+        setPesan(prev => prev.filter(m => m.id !== optimistic.id))
+        setInput(text)
+        alert(result.error)
+        return
+      }
       await loadList()
     })
   }

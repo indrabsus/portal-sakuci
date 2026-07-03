@@ -127,24 +127,37 @@ export async function getOrCreatePercakapan(targetId: string): Promise<string | 
   return created?.id ?? null
 }
 
-// Ambil pesan dalam satu percakapan (50 terakhir)
+// Ambil 50 pesan TERBARU lalu balik urutan untuk tampilan kronologis
 export async function getPesan(id_percakapan: string): Promise<Pesan[]> {
   const supabase = await createClient()
   const { data } = await supabase
     .from('chat_pesan')
     .select('id, id_percakapan, id_pengirim, isi, created_at')
     .eq('id_percakapan', id_percakapan)
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
     .limit(50)
 
-  return data ?? []
+  return (data ?? []).reverse()
 }
 
-// Kirim pesan
-export async function kirimPesan(id_percakapan: string, isi: string): Promise<Pesan | null> {
+// Kirim pesan (max 100 pesan/hari/user)
+export async function kirimPesan(id_percakapan: string, isi: string): Promise<Pesan | { error: string } | null> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user || !isi.trim()) return null
+
+  // Cek rate limit: hitung pesan terkirim hari ini
+  const startOfDay = new Date()
+  startOfDay.setHours(0, 0, 0, 0)
+  const { count } = await supabase
+    .from('chat_pesan')
+    .select('id', { count: 'exact', head: true })
+    .eq('id_pengirim', user.id)
+    .gte('created_at', startOfDay.toISOString())
+
+  if ((count ?? 0) >= 100) {
+    return { error: 'Batas 100 pesan per hari tercapai. Coba lagi besok.' }
+  }
 
   const trimmed = isi.trim().slice(0, 2000)
 
