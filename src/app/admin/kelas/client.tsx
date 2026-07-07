@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Eye, Layers } from "lucide-react";
+import { CopyPlus, Eye, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SimpleCrud } from "@/components/simple-crud";
 import {
@@ -14,6 +14,7 @@ import {
 import { createKelas, updateKelas, deleteKelas } from "./actions";
 import { KelasSiswaModal } from "./kelas-siswa-modal";
 import { KelasMasalModal } from "./kelas-masal-modal";
+import { DuplikatKelasModal } from "./duplikat-kelas-modal";
 
 const SEMUA_TAHUN_AJARAN = "semua";
 
@@ -42,6 +43,7 @@ export function KelasClient({
 }) {
   const [selected, setSelected] = useState<Kelas | null>(null);
   const [masalOpen, setMasalOpen] = useState(false);
+  const [duplikatOpen, setDuplikatOpen] = useState(false);
   const [filterTahunAjaran, setFilterTahunAjaran] = useState(defaultTahunAjaranId || SEMUA_TAHUN_AJARAN);
 
   const filterOptions = [{ value: SEMUA_TAHUN_AJARAN, label: "Semua Tahun Ajaran" }, ...tahunAjaranOptions];
@@ -69,10 +71,16 @@ export function KelasClient({
             </SelectContent>
           </Select>
         </div>
-        <Button variant="outline" onClick={() => setMasalOpen(true)}>
-          <Layers className="size-4" />
-          Buat Kelas Massal
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setDuplikatOpen(true)}>
+            <CopyPlus className="size-4" />
+            Duplikat Kelas
+          </Button>
+          <Button variant="outline" onClick={() => setMasalOpen(true)}>
+            <Layers className="size-4" />
+            Buat Kelas Massal
+          </Button>
+        </div>
       </div>
 
       <SimpleCrud<Kelas>
@@ -123,6 +131,13 @@ export function KelasClient({
         open={masalOpen}
         onOpenChange={setMasalOpen}
         jurusanOptions={jurusanOptions}
+        tahunAjaranOptions={tahunAjaranOptions}
+      />
+
+      <DuplikatKelasModal
+        open={duplikatOpen}
+        onOpenChange={setDuplikatOpen}
+        rows={rows}
         tahunAjaranOptions={tahunAjaranOptions}
       />
     </>

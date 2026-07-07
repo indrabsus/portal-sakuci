@@ -144,6 +144,98 @@ export async function removeSiswaFromKelasMasal(formData: FormData): Promise<Act
   return { success: true, message: `${idSiswaKelasList.length} siswa berhasil dikeluarkan dari kelas.` };
 }
 
+export async function duplicateKelas(formData: FormData): Promise<ActionResult> {
+  await requireRole(["admin"]);
+  const supabase = await createClient();
+
+  const idTahunAjaranTujuan = String(formData.get("id_tahun_ajaran_tujuan") ?? "");
+  const idKelasList = JSON.parse(String(formData.get("id_kelas_list") ?? "[]")) as string[];
+  const naikkanTingkat = formData.get("naikkan_tingkat") === "on";
+  const sertakanSiswa = formData.get("sertakan_siswa") === "on";
+
+  if (!idTahunAjaranTujuan || idKelasList.length === 0) {
+    return { success: false, message: "Pilih tahun ajaran tujuan dan minimal satu kelas." };
+  }
+
+  const { data: kelasSumber, error: kelasSumberError } = await supabase
+    .from("kelas")
+    .select("id_kelas, nama_kelas, tingkat, id_jurusan, id_tahun_ajaran")
+    .in("id_kelas", idKelasList);
+  if (kelasSumberError) return { success: false, message: kelasSumberError.message };
+  if (!kelasSumber || kelasSumber.length === 0) return { success: false, message: "Kelas sumber tidak ditemukan." };
+
+  if (kelasSumber.some((k) => k.id_tahun_ajaran === idTahunAjaranTujuan)) {
+    return { success: false, message: "Tahun ajaran tujuan harus berbeda dari tahun ajaran kelas sumber." };
+  }
+
+  const { data: kelasTujuanAda } = await supabase
+    .from("kelas")
+    .select("id_kelas, nama_kelas")
+    .eq("id_tahun_ajaran", idTahunAjaranTujuan);
+  const kelasTujuanMap = new Map((kelasTujuanAda ?? []).map((k) => [k.nama_kelas.trim().toLowerCase(), k.id_kelas]));
+
+  let jumlahKelasDibuat = 0;
+  let jumlahKelasDipakaiUlang = 0;
+  let jumlahSiswaDipindah = 0;
+
+  for (const k of kelasSumber) {
+    const namaKey = k.nama_kelas.trim().toLowerCase();
+    let idKelasBaru = kelasTujuanMap.get(namaKey);
+
+    if (!idKelasBaru) {
+      const tingkatBaru = naikkanTingkat && k.tingkat ? k.tingkat + 1 : k.tingkat;
+      const { data: created, error: createError } = await supabase
+        .from("kelas")
+        .insert({
+          nama_kelas: k.nama_kelas,
+          tingkat: tingkatBaru,
+          id_jurusan: k.id_jurusan,
+          id_tahun_ajaran: idTahunAjaranTujuan,
+          aktif: true,
+        })
+        .select("id_kelas")
+        .single();
+      if (createError || !created) return { success: false, message: createError?.message ?? "Gagal membuat kelas." };
+      idKelasBaru = created.id_kelas;
+      kelasTujuanMap.set(namaKey, idKelasBaru);
+      jumlahKelasDibuat++;
+    } else {
+      jumlahKelasDipakaiUlang++;
+    }
+
+    if (sertakanSiswa) {
+      const anggotaSumber = await fetchAllRows((from, to) =>
+        supabase
+          .from("siswa_kelas")
+          .select("id_siswa")
+          .eq("id_kelas", k.id_kelas)
+          .eq("aktif", true)
+          .range(from, to),
+      );
+      if (anggotaSumber.length > 0) {
+        const { error: upsertError } = await supabase.from("siswa_kelas").upsert(
+          anggotaSumber.map((a) => ({
+            id_siswa: a.id_siswa,
+            id_kelas: idKelasBaru,
+            id_tahun_ajaran: idTahunAjaranTujuan,
+            aktif: true,
+          })),
+          { onConflict: "id_siswa,id_tahun_ajaran" },
+        );
+        if (upsertError) return { success: false, message: upsertError.message };
+        jumlahSiswaDipindah += anggotaSumber.length;
+      }
+    }
+  }
+
+  const bagianKelas =
+    jumlahKelasDipakaiUlang > 0
+      ? `${jumlahKelasDibuat} kelas baru dibuat, ${jumlahKelasDipakaiUlang} kelas sudah ada dipakai ulang`
+      : `${jumlahKelasDibuat} kelas berhasil diduplikat`;
+  const bagianSiswa = sertakanSiswa ? `, ${jumlahSiswaDipindah} siswa disalin` : "";
+  return { success: true, message: `${bagianKelas}${bagianSiswa}.` };
+}
+
 export type AnggotaKelasRow = {
   id_siswa_kelas: string;
   id_siswa: string;
