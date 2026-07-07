@@ -1,12 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Eye, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SimpleCrud } from "@/components/simple-crud";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createKelas, updateKelas, deleteKelas } from "./actions";
 import { KelasSiswaModal } from "./kelas-siswa-modal";
 import { KelasMasalModal } from "./kelas-masal-modal";
+
+const SEMUA_TAHUN_AJARAN = "semua";
 
 type Kelas = {
   id_kelas: string;
@@ -24,17 +33,42 @@ export function KelasClient({
   rows,
   jurusanOptions,
   tahunAjaranOptions,
+  defaultTahunAjaranId,
 }: {
   rows: Kelas[];
   jurusanOptions: { value: string; label: string }[];
   tahunAjaranOptions: { value: string; label: string }[];
+  defaultTahunAjaranId: string;
 }) {
   const [selected, setSelected] = useState<Kelas | null>(null);
   const [masalOpen, setMasalOpen] = useState(false);
+  const [filterTahunAjaran, setFilterTahunAjaran] = useState(defaultTahunAjaranId || SEMUA_TAHUN_AJARAN);
+
+  const filterOptions = [{ value: SEMUA_TAHUN_AJARAN, label: "Semua Tahun Ajaran" }, ...tahunAjaranOptions];
+  const filteredRows = useMemo(
+    () => (filterTahunAjaran === SEMUA_TAHUN_AJARAN ? rows : rows.filter((r) => r.id_tahun_ajaran === filterTahunAjaran)),
+    [rows, filterTahunAjaran],
+  );
 
   return (
     <>
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-3">
+        <div className="w-64">
+          <Select value={filterTahunAjaran} onValueChange={(v) => setFilterTahunAjaran(v ?? SEMUA_TAHUN_AJARAN)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Filter tahun ajaran">
+                {() => filterOptions.find((t) => t.value === filterTahunAjaran)?.label}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {filterOptions.map((t) => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <Button variant="outline" onClick={() => setMasalOpen(true)}>
           <Layers className="size-4" />
           Buat Kelas Massal
@@ -44,7 +78,7 @@ export function KelasClient({
       <SimpleCrud<Kelas>
         title="Kelas"
         idKey="id_kelas"
-        rows={rows}
+        rows={filteredRows}
         columns={[
           { key: "nama_kelas", label: "Nama Kelas" },
           { key: "tingkat", label: "Tingkat" },
