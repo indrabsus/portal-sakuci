@@ -47,7 +47,7 @@ export function KelasSiswaModal({
     setLoading(true);
     setError(null);
     startTransition(async () => {
-      const data = await getKelasSiswaData(idKelas);
+      const data = await getKelasSiswaData(idKelas, idTahunAjaran);
       setAnggota(data.anggota);
       setSemuaSiswa(data.semuaSiswa);
       setLoading(false);
@@ -98,7 +98,7 @@ export function KelasSiswaModal({
   }
 
   function toggleAllSiswa() {
-    const eligible = filteredSiswa.filter((s) => !anggotaIdSet.has(s.id_siswa));
+    const eligible = filteredSiswa.filter((s) => !anggotaIdSet.has(s.id_siswa) && !s.kelas_lain);
     if (selectedSiswa.size === eligible.length && eligible.length > 0) {
       setSelectedSiswa(new Set());
     } else {
@@ -253,7 +253,7 @@ export function KelasSiswaModal({
                     <tr>
                       <th className="w-8 px-3 py-2">
                         {(() => {
-                          const eligible = filteredSiswa.filter((s) => !anggotaIdSet.has(s.id_siswa));
+                          const eligible = filteredSiswa.filter((s) => !anggotaIdSet.has(s.id_siswa) && !s.kelas_lain);
                           return (
                             <Checkbox
                               checked={eligible.length > 0 && selectedSiswa.size === eligible.length}
@@ -272,14 +272,15 @@ export function KelasSiswaModal({
                   <tbody className="divide-y">
                     {filteredSiswa.map((s) => {
                       const isMember = anggotaIdSet.has(s.id_siswa);
+                      const isUnavailable = isMember || !!s.kelas_lain;
                       return (
                         <tr
                           key={s.id_siswa}
-                          className={isMember ? "opacity-60" : "cursor-pointer hover:bg-accent/30"}
-                          onClick={() => !isMember && toggleSiswa(s.id_siswa)}
+                          className={isUnavailable ? "opacity-60" : "cursor-pointer hover:bg-accent/30"}
+                          onClick={() => !isUnavailable && toggleSiswa(s.id_siswa)}
                         >
                           <td className="px-3 py-2">
-                            {!isMember && (
+                            {!isUnavailable && (
                               <Checkbox
                                 checked={selectedSiswa.has(s.id_siswa)}
                                 onCheckedChange={() => toggleSiswa(s.id_siswa)}
@@ -295,12 +296,16 @@ export function KelasSiswaModal({
                             </span>
                           </td>
                           <td className="px-3 py-2 text-right">
-                            {isMember && (
+                            {isMember ? (
                               <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
                                 <Check className="size-3" />
                                 Sudah ada
                               </span>
-                            )}
+                            ) : s.kelas_lain ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
+                                Di kelas {s.kelas_lain}
+                              </span>
+                            ) : null}
                           </td>
                         </tr>
                       );

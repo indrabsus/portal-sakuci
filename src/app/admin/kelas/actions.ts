@@ -151,20 +151,27 @@ export type AnggotaKelasRow = {
   nisn: string | null;
   kelas_dapodik: string | null;
 };
-export type SiswaRow = { id_siswa: string; nama_lengkap: string; nisn: string | null; kelas_dapodik: string | null };
+export type SiswaRow = {
+  id_siswa: string;
+  nama_lengkap: string;
+  nisn: string | null;
+  kelas_dapodik: string | null;
+  kelas_lain: string | null;
+};
 
 export async function getKelasSiswaData(
   idKelas: string,
+  idTahunAjaran: string,
 ): Promise<{ anggota: AnggotaKelasRow[]; semuaSiswa: SiswaRow[] }> {
   await requireRole(["admin"]);
   const supabase = await createClient();
 
-  const [anggotaRaw, siswaSemua] = await Promise.all([
+  const [siswaKelasRaw, siswaSemua] = await Promise.all([
     fetchAllRows((from, to) =>
       supabase
         .from("siswa_kelas")
-        .select("id_siswa_kelas, id_siswa, siswa(nama_lengkap, nisn, kelas)")
-        .eq("id_kelas", idKelas)
+        .select("id_siswa_kelas, id_siswa, id_kelas, siswa(nama_lengkap, nisn, kelas), kelas(nama_kelas)")
+        .eq("id_tahun_ajaran", idTahunAjaran)
         .eq("aktif", true)
         .range(from, to),
     ),
@@ -173,22 +180,32 @@ export async function getKelasSiswaData(
     ),
   ]);
 
-  const anggota: AnggotaKelasRow[] = (anggotaRaw ?? []).map((a) => {
-    const s = a.siswa as unknown as { nama_lengkap: string; nisn: string | null; kelas: string | null } | null;
-    return {
-      id_siswa_kelas: a.id_siswa_kelas,
-      id_siswa: a.id_siswa,
-      nama_lengkap: s?.nama_lengkap ?? "-",
-      nisn: s?.nisn ?? null,
-      kelas_dapodik: s?.kelas ?? null,
-    };
-  });
+  const anggota: AnggotaKelasRow[] = (siswaKelasRaw ?? [])
+    .filter((a) => a.id_kelas === idKelas)
+    .map((a) => {
+      const s = a.siswa as unknown as { nama_lengkap: string; nisn: string | null; kelas: string | null } | null;
+      return {
+        id_siswa_kelas: a.id_siswa_kelas,
+        id_siswa: a.id_siswa,
+        nama_lengkap: s?.nama_lengkap ?? "-",
+        nisn: s?.nisn ?? null,
+        kelas_dapodik: s?.kelas ?? null,
+      };
+    });
+
+  const kelasLainMap = new Map<string, string>();
+  for (const a of siswaKelasRaw ?? []) {
+    if (a.id_kelas === idKelas) continue;
+    const k = a.kelas as unknown as { nama_kelas: string } | null;
+    if (k?.nama_kelas) kelasLainMap.set(a.id_siswa, k.nama_kelas);
+  }
 
   const semuaSiswa: SiswaRow[] = (siswaSemua ?? []).map((s) => ({
     id_siswa: s.id_siswa,
     nama_lengkap: s.nama_lengkap,
     nisn: s.nisn,
     kelas_dapodik: s.kelas,
+    kelas_lain: kelasLainMap.get(s.id_siswa) ?? null,
   }));
 
   return { anggota, semuaSiswa };
