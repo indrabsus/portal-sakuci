@@ -57,7 +57,16 @@ export async function deleteBuku(id: string) {
   await requireRole(["perpus", "admin"]);
   const supabase = await createClient();
   const { error } = await supabase.from("buku").delete().eq("id_buku", id);
-  if (error) return { success: false, message: error.message };
+  if (error) {
+    if (error.code === "23503") {
+      return {
+        success: false,
+        message:
+          "Buku ini punya riwayat peminjaman (aktif maupun yang sudah dikembalikan) sehingga tidak bisa dihapus permanen. Kalau buku ini sudah tidak dipakai lagi, ubah Stok jadi 0 supaya tidak muncul tersedia untuk dipinjam.",
+      };
+    }
+    return { success: false, message: error.message };
+  }
   revalidatePath("/perpus/buku");
   return { success: true };
 }

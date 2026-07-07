@@ -272,7 +272,7 @@ export function BukuClient({ rows }: { rows: BukuRow[] }) {
       <Dialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null); }}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader><DialogTitle>Hapus Buku?</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Buku tidak dapat dihapus jika masih ada peminjaman aktif.</p>
+          <p className="text-sm text-muted-foreground">Buku tidak dapat dihapus kalau punya riwayat peminjaman (aktif maupun yang sudah dikembalikan).</p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteId(null)}>Batal</Button>
             <Button variant="destructive" disabled={isPending} onClick={() => deleteId && handleDelete(deleteId)}>
