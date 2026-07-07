@@ -15,6 +15,18 @@ export async function createTahunAjaran(formData: FormData): Promise<ActionResul
 
   if (!nama || !semester) return { success: false, message: "Nama dan semester wajib diisi." };
 
+  const { data: existing } = await supabase
+    .from("tahun_ajaran")
+    .select("id_tahun_ajaran")
+    .ilike("nama_tahun_ajaran", nama)
+    .maybeSingle();
+  if (existing) {
+    return {
+      success: false,
+      message: `Tahun ajaran "${nama}" sudah ada. Kelas, mengajar, dan siswa terikat ke tahun ajaran ini, bukan ke semester — untuk pindah dari Ganjil ke Genap, edit baris yang sudah ada, jangan buat baru.`,
+    };
+  }
+
   if (aktif) {
     await supabase.from("tahun_ajaran").update({ aktif: false }).eq("aktif", true);
   }
@@ -34,6 +46,16 @@ export async function updateTahunAjaran(formData: FormData): Promise<ActionResul
   const aktif = formData.get("aktif") === "on";
 
   if (!id || !nama || !semester) return { success: false, message: "Data tidak lengkap." };
+
+  const { data: existing } = await supabase
+    .from("tahun_ajaran")
+    .select("id_tahun_ajaran")
+    .ilike("nama_tahun_ajaran", nama)
+    .neq("id_tahun_ajaran", id)
+    .maybeSingle();
+  if (existing) {
+    return { success: false, message: `Tahun ajaran "${nama}" sudah dipakai baris lain.` };
+  }
 
   if (aktif) {
     await supabase.from("tahun_ajaran").update({ aktif: false }).neq("id_tahun_ajaran", id);
