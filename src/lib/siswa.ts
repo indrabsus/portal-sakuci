@@ -1,13 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
+import { getTahunAjaranAktifId } from "@/lib/tahun-ajaran";
 
 export async function getSiswaKelasInfo(idSiswa: string) {
   const supabase = await createClient();
-  const { data } = await supabase
+  const idTahunAjaran = await getTahunAjaranAktifId();
+
+  let query = supabase
     .from("siswa_kelas")
     .select("id_kelas, id_tahun_ajaran, kelas(nama_kelas, tingkat, id_jurusan)")
-    .eq("id_siswa", idSiswa)
-    .eq("aktif", true)
-    .maybeSingle();
+    .eq("id_siswa", idSiswa);
+
+  if (idTahunAjaran) {
+    query = query.eq("id_tahun_ajaran", idTahunAjaran);
+  } else {
+    query = query.eq("aktif", true);
+  }
+
+  const { data } = await query.maybeSingle();
 
   const kelas = data?.kelas as unknown as { nama_kelas: string; tingkat: number | null; id_jurusan: string | null } | null;
 

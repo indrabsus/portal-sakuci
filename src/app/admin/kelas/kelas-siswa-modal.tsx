@@ -89,6 +89,23 @@ export function KelasSiswaModal({
     });
   }
 
+  function toggleAllAnggota() {
+    if (selectedAnggota.size === anggota.length) {
+      setSelectedAnggota(new Set());
+    } else {
+      setSelectedAnggota(new Set(anggota.map((a) => a.id_siswa_kelas)));
+    }
+  }
+
+  function toggleAllSiswa() {
+    const eligible = filteredSiswa.filter((s) => !anggotaIdSet.has(s.id_siswa));
+    if (selectedSiswa.size === eligible.length && eligible.length > 0) {
+      setSelectedSiswa(new Set());
+    } else {
+      setSelectedSiswa(new Set(eligible.map((s) => s.id_siswa)));
+    }
+  }
+
   function handleAddSelected() {
     setError(null);
     if (selectedSiswa.size === 0) return;
@@ -161,7 +178,12 @@ export function KelasSiswaModal({
                 <table className="w-full text-sm">
                   <thead className="sticky top-0 bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
                     <tr>
-                      <th className="w-8 px-3 py-2"></th>
+                      <th className="w-8 px-3 py-2">
+                        <Checkbox
+                          checked={anggota.length > 0 && selectedAnggota.size === anggota.length}
+                          onCheckedChange={toggleAllAnggota}
+                        />
+                      </th>
                       <th className="px-3 py-2 text-left font-semibold">Nama</th>
                       <th className="px-3 py-2 text-left font-semibold">NISN</th>
                       <th className="px-3 py-2 text-left font-semibold">Kelas Dapodik</th>
@@ -229,7 +251,18 @@ export function KelasSiswaModal({
                 <table className="w-full text-sm">
                   <thead className="sticky top-0 bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
                     <tr>
-                      <th className="w-8 px-3 py-2"></th>
+                      <th className="w-8 px-3 py-2">
+                        {(() => {
+                          const eligible = filteredSiswa.filter((s) => !anggotaIdSet.has(s.id_siswa));
+                          return (
+                            <Checkbox
+                              checked={eligible.length > 0 && selectedSiswa.size === eligible.length}
+                              onCheckedChange={toggleAllSiswa}
+                              disabled={eligible.length === 0}
+                            />
+                          );
+                        })()}
+                      </th>
                       <th className="px-3 py-2 text-left font-semibold">Nama</th>
                       <th className="px-3 py-2 text-left font-semibold">NISN</th>
                       <th className="px-3 py-2 text-left font-semibold">Kelas Dapodik</th>

@@ -102,19 +102,10 @@ export async function addSiswaToKelas(formData: FormData): Promise<ActionResult>
 
   if (!idKelas || !idSiswa) return { success: false, message: "Pilih siswa terlebih dahulu." };
 
-  // Nonaktifkan penempatan lama siswa ini di tahun ajaran yang sama (kalau ada), lalu tambahkan ke kelas baru
-  await supabase
-    .from("siswa_kelas")
-    .update({ aktif: false })
-    .eq("id_siswa", idSiswa)
-    .eq("id_tahun_ajaran", idTahunAjaran);
-
-  const { error } = await supabase.from("siswa_kelas").insert({
-    id_siswa: idSiswa,
-    id_kelas: idKelas,
-    id_tahun_ajaran: idTahunAjaran || null,
-    aktif: true,
-  });
+  const { error } = await supabase.from("siswa_kelas").upsert(
+    { id_siswa: idSiswa, id_kelas: idKelas, id_tahun_ajaran: idTahunAjaran || null, aktif: true },
+    { onConflict: "id_siswa,id_tahun_ajaran" },
+  );
   if (error) return { success: false, message: error.message };
   return { success: true, message: "Siswa berhasil ditambahkan ke kelas." };
 }
@@ -129,19 +120,14 @@ export async function addSiswaToKelasMasal(formData: FormData): Promise<ActionRe
 
   if (!idKelas || idSiswaList.length === 0) return { success: false, message: "Pilih siswa terlebih dahulu." };
 
-  await supabase
-    .from("siswa_kelas")
-    .update({ aktif: false })
-    .in("id_siswa", idSiswaList)
-    .eq("id_tahun_ajaran", idTahunAjaran);
-
-  const { error } = await supabase.from("siswa_kelas").insert(
+  const { error } = await supabase.from("siswa_kelas").upsert(
     idSiswaList.map((idSiswa) => ({
       id_siswa: idSiswa,
       id_kelas: idKelas,
       id_tahun_ajaran: idTahunAjaran || null,
       aktif: true,
     })),
+    { onConflict: "id_siswa,id_tahun_ajaran" },
   );
   if (error) return { success: false, message: error.message };
   return { success: true, message: `${idSiswaList.length} siswa berhasil ditambahkan ke kelas.` };

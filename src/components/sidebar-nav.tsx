@@ -29,6 +29,7 @@ import {
   MessageCircle,
   HeartHandshake,
   NotebookPen,
+  ArrowRightLeft,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
@@ -63,6 +64,7 @@ const ICONS = {
   "message-circle": MessageCircle,
   "heart-handshake": HeartHandshake,
   "notebook-pen": NotebookPen,
+  "arrow-right-left": ArrowRightLeft,
 } as const;
 
 export type NavIconKey = keyof typeof ICONS;

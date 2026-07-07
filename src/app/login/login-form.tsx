@@ -26,7 +26,7 @@ function labelFor(ta: TahunAjaran) {
 
 const ERROR_MESSAGE: Record<string, string> = {
   field_kosong: "Semua field wajib diisi.",
-  login_gagal: "Email atau password salah.",
+  login_gagal: "Username atau password salah.",
   akun_tidak_aktif: "Akun Anda belum aktif. Hubungi admin.",
 };
 
@@ -54,8 +54,21 @@ export function LoginForm({
       )}
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" required autoComplete="username" />
+        <Label htmlFor="username">Username</Label>
+        <div className="flex items-center rounded-md border bg-background overflow-hidden focus-within:ring-2 focus-within:ring-ring">
+          <input
+            id="username"
+            name="username"
+            type="text"
+            required
+            autoComplete="username"
+            placeholder="contoh: budi.santoso"
+            className="flex-1 min-w-0 px-3 py-2 text-sm bg-transparent outline-none"
+          />
+          <span className="px-3 py-2 text-xs text-muted-foreground bg-muted border-l select-none whitespace-nowrap">
+            @sakuci.id
+          </span>
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">

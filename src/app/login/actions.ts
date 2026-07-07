@@ -6,13 +6,15 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
 
 export async function loginAction(formData: FormData) {
-  const email = String(formData.get("email") ?? "").trim();
+  const username = String(formData.get("username") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   const idTahunAjaran = String(formData.get("id_tahun_ajaran") ?? "");
 
-  if (!email || !password || !idTahunAjaran) {
+  if (!username || !password || !idTahunAjaran) {
     redirect("/login?error=field_kosong");
   }
+
+  const email = `${username}@sakuci.id`;
 
   const supabase = await createClient();
   const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });

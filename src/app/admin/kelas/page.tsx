@@ -11,7 +11,7 @@ export default async function KelasPage() {
         .select("id_kelas, nama_kelas, tingkat, id_jurusan, id_tahun_ajaran, aktif, jurusan(nama_jurusan), tahun_ajaran(nama_tahun_ajaran)")
         .order("nama_kelas"),
       supabase.from("jurusan").select("id_jurusan, nama_jurusan").order("nama_jurusan"),
-      supabase.from("tahun_ajaran").select("id_tahun_ajaran, nama_tahun_ajaran").order("nama_tahun_ajaran", { ascending: false }),
+      supabase.from("tahun_ajaran").select("id_tahun_ajaran, nama_tahun_ajaran, semester").order("nama_tahun_ajaran", { ascending: false }),
       supabase.from("siswa_kelas").select("id_kelas").eq("aktif", true),
     ]);
 
@@ -36,7 +36,7 @@ export default async function KelasPage() {
     <KelasClient
       rows={rows}
       jurusanOptions={(jurusanList ?? []).map((j) => ({ value: j.id_jurusan, label: j.nama_jurusan }))}
-      tahunAjaranOptions={(tahunAjaranList ?? []).map((t) => ({ value: t.id_tahun_ajaran, label: t.nama_tahun_ajaran }))}
+      tahunAjaranOptions={(tahunAjaranList ?? []).map((t) => ({ value: t.id_tahun_ajaran, label: `${t.nama_tahun_ajaran} — ${t.semester ?? ""}` }))}
     />
   );
 }

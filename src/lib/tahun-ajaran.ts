@@ -9,11 +9,14 @@ export async function getTahunAjaranAktifLabel(): Promise<string | null> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("tahun_ajaran")
-    .select("nama_tahun_ajaran")
+    .select("nama_tahun_ajaran, semester")
     .eq("id_tahun_ajaran", idTahunAjaran)
     .single();
 
-  return data?.nama_tahun_ajaran ?? null;
+  if (!data) return null;
+  return data.semester
+    ? `${data.nama_tahun_ajaran} — ${data.semester}`
+    : data.nama_tahun_ajaran;
 }
 
 export async function getTahunAjaranAktifId(): Promise<string | null> {
