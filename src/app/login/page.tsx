@@ -1,7 +1,21 @@
 import Image from "next/image";
+import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { LoginForm } from "./login-form";
 import { AppFooter } from "@/components/app-footer";
+
+const getTahunAjaranListCached = unstable_cache(
+  async () => {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("tahun_ajaran")
+      .select("id_tahun_ajaran, nama_tahun_ajaran, semester, aktif")
+      .order("nama_tahun_ajaran", { ascending: false });
+    return data ?? [];
+  },
+  ["login-tahun-ajaran-list"],
+  { revalidate: 60 },
+);
 
 export default async function LoginPage({
   searchParams,
@@ -9,11 +23,7 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
-  const admin = createAdminClient();
-  const { data: tahunAjaranList } = await admin
-    .from("tahun_ajaran")
-    .select("id_tahun_ajaran, nama_tahun_ajaran, semester, aktif")
-    .order("nama_tahun_ajaran", { ascending: false });
+  const tahunAjaranList = await getTahunAjaranListCached();
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/20 p-4">
