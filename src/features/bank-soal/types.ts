@@ -17,4 +17,5 @@ export type BankSoalRow = {
   id_mapel: string | null;
   mapel_nama: string | null;
   jumlah_opsi: number;
+  opsi?: OpsiJawaban[];
 };

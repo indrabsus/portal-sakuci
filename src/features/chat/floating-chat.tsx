@@ -286,7 +286,7 @@ export function FloatingChat({ currentUserId }: { currentUserId: string }) {
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2">
+    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2 print:hidden">
       {/* Panel */}
       {open && (
         <div className="w-[340px] h-[520px] flex flex-col rounded-2xl shadow-2xl border border-white/10 bg-[oklch(0.16_0.02_265)] overflow-hidden">

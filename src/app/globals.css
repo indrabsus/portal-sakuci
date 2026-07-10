@@ -138,8 +138,11 @@
   main {
     padding: 0 !important;
   }
+  html,
   body {
     background: white !important;
+    overflow: visible !important;
+    height: auto !important;
   }
 }
 

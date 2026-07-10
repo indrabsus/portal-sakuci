@@ -5,6 +5,7 @@ import type { NavIconKey } from "@/components/sidebar-nav";
 
 const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/guru/dashboard", label: "Dashboard", icon: "dashboard" },
+  { href: "/guru/absen", label: "Absen", icon: "calendar-range" },
   { href: "/guru/profil", label: "Profil Saya", icon: "user-circle" },
   { href: "/guru/mengajar", label: "Pembagian Mengajar", icon: "school" },
   { href: "/guru/materi", label: "Materi", icon: "book-open" },

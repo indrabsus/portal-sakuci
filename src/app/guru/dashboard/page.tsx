@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { School, BookOpen, FileText, ClipboardCheck, BookMarked, NotebookText } from "lucide-react";
+import { School, BookOpen, FileText, ClipboardCheck, BookMarked, NotebookText, CalendarRange } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const MENU_GURU = [
+  { href: "/guru/absen", label: "Absen", desc: "Lihat rekap kehadiran fingerprint Anda.", icon: CalendarRange },
   { href: "/guru/mengajar", label: "Pembagian Mengajar", desc: "Pilih kelas dan mapel yang Anda ajar.", icon: School },
   { href: "/guru/materi", label: "Materi", desc: "Bagikan materi teks, link, atau file.", icon: BookOpen },
   { href: "/guru/tugas", label: "Tugas", desc: "Buat tugas dari bank soal.", icon: FileText },
