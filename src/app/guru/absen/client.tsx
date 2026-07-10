@@ -1,7 +1,8 @@
 "use client";
 
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarClock, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { CalendarClock, CheckCircle2, Clock, Loader2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -96,9 +97,12 @@ export function AbsenClient({
   namaLengkap: string;
 }) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   function updateFilter(nextBulan: number, nextTahun: number) {
-    router.push(`/guru/absen?bulan=${nextBulan}&tahun=${nextTahun}`);
+    startTransition(() => {
+      router.push(`/guru/absen?bulan=${nextBulan}&tahun=${nextTahun}`);
+    });
   }
 
   const bulanLabel = BULAN_OPTIONS.find((b) => b.value === String(bulan))?.label ?? "";
@@ -128,8 +132,8 @@ export function AbsenClient({
           {!error && <PrintButton label="Cetak PDF" onPrint={printPortraitA4} />}
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <Select value={String(bulan)} onValueChange={(v) => v && updateFilter(Number(v), tahun)}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <Select disabled={isPending} value={String(bulan)} onValueChange={(v) => v && updateFilter(Number(v), tahun)}>
             <SelectTrigger className="w-full sm:w-44">
               <SelectValue>{bulanLabel}</SelectValue>
             </SelectTrigger>
@@ -140,7 +144,7 @@ export function AbsenClient({
             </SelectContent>
           </Select>
 
-          <Select value={String(tahun)} onValueChange={(v) => v && updateFilter(bulan, Number(v))}>
+          <Select disabled={isPending} value={String(tahun)} onValueChange={(v) => v && updateFilter(bulan, Number(v))}>
             <SelectTrigger className="w-full sm:w-32">
               <SelectValue>{tahun}</SelectValue>
             </SelectTrigger>
@@ -150,6 +154,13 @@ export function AbsenClient({
               ))}
             </SelectContent>
           </Select>
+
+          {isPending && (
+            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Loader2 className="size-4 animate-spin" />
+              Memuat data...
+            </span>
+          )}
         </div>
 
         {error ? (
@@ -157,7 +168,7 @@ export function AbsenClient({
             <CardContent className="py-8 text-center text-sm text-muted-foreground">{error}</CardContent>
           </Card>
         ) : (
-          <>
+          <div className={cn("flex flex-col gap-4 transition-opacity", isPending && "pointer-events-none opacity-50")}>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {summaryCards.map((card) => (
                 <Card key={card.label} className="shadow-sm">
@@ -211,7 +222,7 @@ export function AbsenClient({
                 </Table>
               </div>
             </Card>
-          </>
+          </div>
         )}
       </div>
 
