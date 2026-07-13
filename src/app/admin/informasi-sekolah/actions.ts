@@ -17,6 +17,7 @@ export async function updateInformasiSekolah(formData: FormData): Promise<Action
     instagram: String(formData.get("instagram") ?? "").trim() || null,
     no_telepon: String(formData.get("no_telepon") ?? "").trim() || null,
     nama_kepala_sekolah: String(formData.get("nama_kepala_sekolah") ?? "").trim() || null,
+    nip_kepala_sekolah: String(formData.get("nip_kepala_sekolah") ?? "").trim() || null,
     visi: String(formData.get("visi") ?? "").trim() || null,
     misi: String(formData.get("misi") ?? "").trim() || null,
   };

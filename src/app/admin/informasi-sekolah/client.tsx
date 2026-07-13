@@ -16,6 +16,7 @@ type Sekolah = {
   instagram: string | null;
   no_telepon: string | null;
   nama_kepala_sekolah: string | null;
+  nip_kepala_sekolah: string | null;
   visi: string | null;
   misi: string | null;
 };
@@ -71,6 +72,10 @@ export function InformasiSekolahClient({ data }: { data: Sekolah | null }) {
           <div className="flex flex-col gap-2">
             <Label htmlFor="nama_kepala_sekolah">Nama Kepala Sekolah</Label>
             <Input id="nama_kepala_sekolah" name="nama_kepala_sekolah" defaultValue={data?.nama_kepala_sekolah ?? ""} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="nip_kepala_sekolah">NIP Kepala Sekolah (untuk sertifikat)</Label>
+            <Input id="nip_kepala_sekolah" name="nip_kepala_sekolah" defaultValue={data?.nip_kepala_sekolah ?? ""} />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="visi">Visi (untuk halaman publik)</Label>

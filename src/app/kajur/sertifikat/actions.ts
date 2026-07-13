@@ -4,14 +4,11 @@ import { requireKajurJurusan } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getJabatanKajur } from "@/lib/kompetensi-progress";
+import { generateKode } from "@/lib/sertifikat-kode";
 
 type ActionResult = { success: boolean; message: string };
 
-function generateKode() {
-  return Math.random().toString(36).slice(2, 10).toUpperCase();
-}
-
-async function verifyKompetensiOwnership(
+export async function verifyKompetensiOwnership(
   supabase: Awaited<ReturnType<typeof createClient>>,
   idKompetensi: string,
   idJurusan: string,
@@ -20,7 +17,7 @@ async function verifyKompetensiOwnership(
   return data?.id_jurusan === idJurusan;
 }
 
-async function verifySertifikatOwnership(
+export async function verifySertifikatOwnership(
   supabase: Awaited<ReturnType<typeof createClient>>,
   idSertifikat: string,
   idJurusan: string,
@@ -65,6 +62,7 @@ export async function terbitkanSertifikat(formData: FormData): Promise<ActionRes
     status: "aktif",
     nama_kajur: profile.nama_lengkap,
     jabatan_kajur: jabatanKajur,
+    nip_kajur: profile.nip_nuptk,
     qr_code: `/verifikasi/${kodeVerifikasi}`,
   });
 

@@ -7,7 +7,7 @@ export default async function AdminKajurPage() {
   const [{ data: kajurList }, { data: jurusanList }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id_profile, nama_lengkap, email, id_jurusan, roles!inner(nama_role)")
+      .select("id_profile, nama_lengkap, email, id_jurusan, nip_nuptk, roles!inner(nama_role)")
       .eq("roles.nama_role", "kajur")
       .order("nama_lengkap"),
     supabase.from("jurusan").select("id_jurusan, nama_jurusan").order("nama_jurusan"),
@@ -20,6 +20,7 @@ export default async function AdminKajurPage() {
         nama_lengkap: k.nama_lengkap,
         email: k.email,
         id_jurusan: k.id_jurusan,
+        nip_nuptk: k.nip_nuptk,
       }))}
       jurusanOptions={(jurusanList ?? []).map((j) => ({ value: j.id_jurusan, label: j.nama_jurusan }))}
     />

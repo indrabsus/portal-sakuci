@@ -28,6 +28,7 @@ export default async function SertifikatPage() {
         .from("sertifikat")
         .select("id_sertifikat, nomor_sertifikat, nilai, tanggal_terbit, status, id_siswa, id_kompetensi, siswa(nama_lengkap), kompetensi(judul)")
         .eq("id_jurusan", profile.id_jurusan)
+        .not("id_kompetensi", "is", null)
         .order("tanggal_terbit", { ascending: false })
         .range(from, to),
     ),

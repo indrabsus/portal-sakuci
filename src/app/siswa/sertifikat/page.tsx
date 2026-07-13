@@ -11,13 +11,14 @@ export default async function SiswaSertifikatPage() {
 
   const { data: sertifikatRaw } = await supabase
     .from("sertifikat")
-    .select("id_sertifikat, id_kompetensi, nomor_sertifikat, nilai, tanggal_terbit, kompetensi(judul)")
+    .select("id_sertifikat, id_kompetensi, judul_manual, nomor_sertifikat, nilai, tanggal_terbit, kompetensi(judul)")
     .eq("id_siswa", profile.id_siswa ?? "")
     .eq("status", "aktif")
     .order("tanggal_terbit", { ascending: false });
 
   const sertifikatList = await Promise.all(
     (sertifikatRaw ?? []).map(async (s) => {
+      if (s.id_kompetensi == null) return s;
       const rincian = await getRincianTesKompetensi(supabase, profile.id_siswa ?? "", s.id_kompetensi);
       return { ...s, nilai: hitungNilaiAkhir(rincian) ?? s.nilai };
     }),
@@ -40,7 +41,7 @@ export default async function SiswaSertifikatPage() {
                 <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Award className="size-5" />
                 </div>
-                <CardTitle className="text-base">{(s.kompetensi as unknown as { judul: string } | null)?.judul ?? "-"}</CardTitle>
+                <CardTitle className="text-base">{s.judul_manual ?? (s.kompetensi as unknown as { judul: string } | null)?.judul ?? "-"}</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-2">
                 <p className="text-xs text-muted-foreground font-mono">{s.nomor_sertifikat}</p>

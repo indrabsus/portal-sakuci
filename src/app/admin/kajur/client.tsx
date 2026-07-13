@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Select,
@@ -12,13 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { updateJurusanKajur } from "./actions";
+import { updateJurusanKajur, updateNipKajur } from "./actions";
 
 type KajurRow = {
   id_profile: string;
   nama_lengkap: string | null;
   email: string | null;
   id_jurusan: string | null;
+  nip_nuptk: string | null;
 };
 
 export function KajurJurusanClient({
@@ -33,6 +35,9 @@ export function KajurJurusanClient({
   const [values, setValues] = useState<Record<string, string>>(
     Object.fromEntries(rows.map((r) => [r.id_profile, r.id_jurusan ?? ""])),
   );
+  const [nipValues, setNipValues] = useState<Record<string, string>>(
+    Object.fromEntries(rows.map((r) => [r.id_profile, r.nip_nuptk ?? ""])),
+  );
 
   function handleChange(idProfile: string, idJurusan: string) {
     setValues((prev) => ({ ...prev, [idProfile]: idJurusan }));
@@ -41,6 +46,18 @@ export function KajurJurusanClient({
     formData.set("id_jurusan", idJurusan);
     startTransition(async () => {
       await updateJurusanKajur(formData);
+      router.refresh();
+    });
+  }
+
+  function handleNipBlur(idProfile: string, original: string | null) {
+    const nip = nipValues[idProfile] ?? "";
+    if (nip === (original ?? "")) return;
+    const formData = new FormData();
+    formData.set("id_profile", idProfile);
+    formData.set("nip_nuptk", nip);
+    startTransition(async () => {
+      await updateNipKajur(formData);
       router.refresh();
     });
   }
@@ -62,12 +79,13 @@ export function KajurJurusanClient({
                 <TableHead>Nama Kajur</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Jurusan</TableHead>
+                <TableHead>NIP/NUPTK (untuk sertifikat)</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">Belum ada akun Kajur</TableCell>
+                  <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">Belum ada akun Kajur</TableCell>
                 </TableRow>
               )}
               {rows.map((row) => (
@@ -95,6 +113,15 @@ export function KajurJurusanClient({
                         ))}
                       </SelectContent>
                     </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      className="w-40"
+                      value={nipValues[row.id_profile] ?? ""}
+                      onChange={(e) => setNipValues((prev) => ({ ...prev, [row.id_profile]: e.target.value }))}
+                      onBlur={() => handleNipBlur(row.id_profile, row.nip_nuptk)}
+                      disabled={isPending}
+                    />
                   </TableCell>
                 </TableRow>
               ))}

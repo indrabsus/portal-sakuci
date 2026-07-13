@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { generateQrDataUrl } from "@/lib/qr";
-import { getRincianTesKompetensi, hitungNilaiAkhir, cekStatusLulus, getJabatanKajur } from "@/lib/kompetensi-progress";
+import { resolveSertifikatCetak } from "@/lib/sertifikat-cetak";
 import { CertificateView } from "@/components/certificate-view";
 import { PrintButton } from "@/components/print-button";
 
@@ -18,7 +18,7 @@ export default async function CetakSertifikatPage({ params }: { params: Promise<
     supabase
       .from("sertifikat")
       .select(
-        "id_sertifikat, id_siswa, id_kompetensi, nomor_sertifikat, nilai, tanggal_terbit, kode_verifikasi, nama_kajur, jabatan_kajur, siswa(nama_lengkap), kompetensi(judul, syarat_lulus)",
+        "id_sertifikat, id_siswa, id_kompetensi, judul_manual, nomor_sertifikat, nilai, tanggal_terbit, kode_verifikasi, nama_kajur, jabatan_kajur, nip_kajur, nama_kepsek, nip_kepsek, siswa(nama_lengkap), kompetensi(judul, syarat_lulus)",
       )
       .eq("id_sertifikat", id)
       .single(),
@@ -28,10 +28,16 @@ export default async function CetakSertifikatPage({ params }: { params: Promise<
   if (!sertifikat) notFound();
 
   const kodeVerifikasi = sertifikat.kode_verifikasi ?? "";
-  const [qrDataUrl, rincianTes, jabatanKajur] = await Promise.all([
+  const [qrDataUrl, resolved] = await Promise.all([
     generateQrDataUrl(`${origin}/verifikasi/${kodeVerifikasi}`),
-    getRincianTesKompetensi(supabase, sertifikat.id_siswa, sertifikat.id_kompetensi),
-    getJabatanKajur(supabase, sertifikat.id_kompetensi),
+    resolveSertifikatCetak(supabase, {
+      id_siswa: sertifikat.id_siswa,
+      id_kompetensi: sertifikat.id_kompetensi,
+      judul_manual: sertifikat.judul_manual,
+      nilai: sertifikat.nilai,
+      jabatan_kajur: sertifikat.jabatan_kajur,
+      kompetensi: sertifikat.kompetensi as unknown as { judul: string; syarat_lulus: number } | null,
+    }),
   ]);
 
   return (
@@ -47,20 +53,20 @@ export default async function CetakSertifikatPage({ params }: { params: Promise<
       <CertificateView
         data={{
           namaSiswa: (sertifikat.siswa as unknown as { nama_lengkap: string } | null)?.nama_lengkap ?? "-",
-          judulKompetensi: (sertifikat.kompetensi as unknown as { judul: string } | null)?.judul ?? "-",
-          nilai: hitungNilaiAkhir(rincianTes) ?? sertifikat.nilai,
+          judulKompetensi: resolved.judulKompetensi,
+          nilai: resolved.nilai,
           nomorSertifikat: sertifikat.nomor_sertifikat,
           kodeVerifikasi: sertifikat.kode_verifikasi,
           tanggalTerbit: sertifikat.tanggal_terbit,
           namaKajur: sertifikat.nama_kajur,
-          jabatanKajur,
+          jabatanKajur: resolved.jabatanKajur,
+          nipKajur: sertifikat.nip_kajur,
+          namaKepsek: sertifikat.nama_kepsek,
+          nipKepsek: sertifikat.nip_kepsek,
           qrDataUrl,
           namaSekolah: sekolah?.nama_sekolah ?? "Portal Sakuci",
-          rincianTes,
-          statusLulus: cekStatusLulus(
-            rincianTes,
-            (sertifikat.kompetensi as unknown as { syarat_lulus: number } | null)?.syarat_lulus ?? 75,
-          ),
+          rincianTes: resolved.rincianTes,
+          statusLulus: resolved.statusLulus,
         }}
       />
     </div>

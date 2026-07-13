@@ -8,7 +8,7 @@ export default async function VerifikasiPage({ params }: { params: Promise<{ kod
 
   const { data: sertifikat } = await admin
     .from("sertifikat")
-    .select("nomor_sertifikat, nilai, tanggal_terbit, status, siswa(nama_lengkap), kompetensi(judul)")
+    .select("nomor_sertifikat, nilai, tanggal_terbit, status, judul_manual, siswa(nama_lengkap), kompetensi(judul)")
     .eq("kode_verifikasi", kode)
     .maybeSingle();
 
@@ -33,7 +33,7 @@ export default async function VerifikasiPage({ params }: { params: Promise<{ kod
         {sertifikat && (
           <div className="mt-6 flex flex-col gap-2 rounded-xl border bg-muted/30 p-4 text-left text-sm">
             <Row label="Nama Siswa" value={(sertifikat.siswa as unknown as { nama_lengkap: string } | null)?.nama_lengkap ?? "-"} />
-            <Row label="Kompetensi" value={(sertifikat.kompetensi as unknown as { judul: string } | null)?.judul ?? "-"} />
+            <Row label="Kompetensi" value={sertifikat.judul_manual ?? (sertifikat.kompetensi as unknown as { judul: string } | null)?.judul ?? "-"} />
             <Row label="Nilai" value={String(sertifikat.nilai ?? "-")} />
             <Row label="No. Sertifikat" value={sertifikat.nomor_sertifikat ?? "-"} mono />
             <Row

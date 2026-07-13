@@ -8,6 +8,7 @@ const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/kajur/roadmap", label: "Roadmap Kompetensi", icon: "route" },
   { href: "/kajur/validasi-kompetensi", label: "Validasi Tes Kompetensi", icon: "clipboard-list" },
   { href: "/kajur/sertifikat", label: "Sertifikat Siswa", icon: "award" },
+  { href: "/kajur/sertifikat-manual", label: "Sertifikat Manual", icon: "notebook-pen" },
   { href: "/kajur/rekap-kompetensi", label: "Rekap Kompetensi", icon: "clipboard-check" },
   { href: "/kajur/inovasi-siswa", label: "Project & Inovasi Siswa", icon: "sparkles" },
   { href: "/kajur/konseling", label: "Konseling Siswa", icon: "heart-handshake" },

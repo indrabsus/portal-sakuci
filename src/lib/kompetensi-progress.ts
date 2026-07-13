@@ -56,6 +56,27 @@ export function cekStatusLulus(rincianTes: { nilai: number | null }[], syaratLul
 }
 
 /**
+ * Jabatan penandatangan sertifikat menyesuaikan jurusan, misal
+ * "Ketua Program Keahlian PPLG". Kalau jurusan tidak ditemukan,
+ * pakai sebutan generik "Kepala Jurusan".
+ */
+export async function getJabatanKajurByJurusan(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: SupabaseClient<any, any, any>,
+  idJurusan: string,
+): Promise<string> {
+  const { data: jurusan } = await supabase
+    .from("jurusan")
+    .select("kode_jurusan, nama_jurusan")
+    .eq("id_jurusan", idJurusan)
+    .single();
+
+  if (!jurusan) return "Kepala Jurusan";
+
+  return `Ketua Program Keahlian ${jurusan.kode_jurusan || jurusan.nama_jurusan}`;
+}
+
+/**
  * Jabatan penandatangan sertifikat menyesuaikan jurusan kompetensinya,
  * misal "Ketua Program Keahlian PPLG". Kalau kompetensi berlaku untuk
  * semua jurusan (id_jurusan kosong), pakai sebutan generik "Kepala Jurusan".
@@ -67,14 +88,13 @@ export async function getJabatanKajur(
 ): Promise<string> {
   const { data: kompetensi } = await supabase
     .from("kompetensi")
-    .select("id_jurusan, jurusan(kode_jurusan, nama_jurusan)")
+    .select("id_jurusan")
     .eq("id_kompetensi", idKompetensi)
     .single();
 
-  const jurusan = kompetensi?.jurusan as unknown as { kode_jurusan: string | null; nama_jurusan: string } | null;
-  if (!jurusan) return "Kepala Jurusan";
+  if (!kompetensi?.id_jurusan) return "Kepala Jurusan";
 
-  return `Ketua Program Keahlian ${jurusan.kode_jurusan || jurusan.nama_jurusan}`;
+  return getJabatanKajurByJurusan(supabase, kompetensi.id_jurusan);
 }
 
 /**

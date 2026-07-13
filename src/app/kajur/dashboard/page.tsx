@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, Route, FileQuestion, Award, ClipboardCheck, ClipboardList, BarChart3, Sparkles } from "lucide-react";
+import { AlertTriangle, Route, FileQuestion, Award, ClipboardCheck, ClipboardList, BarChart3, Sparkles, NotebookPen } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,7 @@ const MENU_KAJUR = [
   { href: "/kajur/roadmap", label: "Roadmap Kompetensi", desc: "Susun jenjang kompetensi jurusan Anda.", icon: Route },
   { href: "/kajur/validasi-kompetensi", label: "Validasi Tes Kompetensi", desc: "Nilai jawaban essay tes roadmap siswa.", icon: ClipboardList },
   { href: "/kajur/sertifikat", label: "Sertifikat Siswa", desc: "Terbitkan sertifikat kompetensi siswa.", icon: Award },
+  { href: "/kajur/sertifikat-manual", label: "Sertifikat Manual", desc: "Terbitkan sertifikat dengan kompetensi & nilai manual.", icon: NotebookPen },
   { href: "/kajur/rekap-kompetensi", label: "Rekap Kompetensi", desc: "Lihat progres kompetensi siswa jurusan Anda.", icon: ClipboardCheck },
   { href: "/kajur/inovasi-siswa", label: "Project & Inovasi Siswa", desc: "Lihat project/inovasi siswa jurusan Anda.", icon: Sparkles },
   { href: "/kajur/laporan", label: "Laporan Keaktifan", desc: "Pantau keaktifan guru dan siswa.", icon: BarChart3 },

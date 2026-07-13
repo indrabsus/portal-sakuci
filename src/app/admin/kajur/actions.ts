@@ -18,3 +18,17 @@ export async function updateJurusanKajur(formData: FormData): Promise<ActionResu
   if (error) return { success: false, message: error.message };
   return { success: true, message: "Jurusan Kajur berhasil diperbarui." };
 }
+
+export async function updateNipKajur(formData: FormData): Promise<ActionResult> {
+  await requireRole(["admin"]);
+  const supabase = await createClient();
+
+  const idProfile = String(formData.get("id_profile") ?? "");
+  const nipNuptk = String(formData.get("nip_nuptk") ?? "").trim() || null;
+
+  if (!idProfile) return { success: false, message: "Data tidak valid." };
+
+  const { error } = await supabase.from("profiles").update({ nip_nuptk: nipNuptk }).eq("id_profile", idProfile);
+  if (error) return { success: false, message: error.message };
+  return { success: true, message: "NIP/NUPTK Kajur berhasil diperbarui." };
+}

@@ -7,6 +7,9 @@ type CertificateData = {
   tanggalTerbit: string | null;
   namaKajur: string | null;
   jabatanKajur: string | null;
+  nipKajur?: string | null;
+  namaKepsek?: string | null;
+  nipKepsek?: string | null;
   qrDataUrl: string;
   namaSekolah: string;
   rincianTes: { judul: string; nilai: number | null }[];
@@ -67,6 +70,31 @@ function CornerOrnament({ className }: { className: string }) {
   );
 }
 
+function InfoSertifikat({ nomor, tanggal, qrDataUrl }: { nomor: string | null; tanggal: string | null; qrDataUrl: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1 text-center">
+      <p className="text-[10px] text-neutral-500">No. Sertifikat</p>
+      <p className="font-mono text-xs font-semibold text-neutral-900">{nomor ?? "-"}</p>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={qrDataUrl} alt="QR Verifikasi" className="mt-1 size-16 rounded-md border border-neutral-300 bg-white p-1" />
+      <p className="text-[9px] text-neutral-500">
+        {tanggal ? new Date(tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "-"}
+      </p>
+    </div>
+  );
+}
+
+function TandaTangan({ jabatan, nama, nip }: { jabatan: string; nama: string; nip?: string | null }) {
+  return (
+    <div className="flex flex-col items-center gap-1 text-center">
+      <p className="text-xs text-neutral-500">{jabatan}</p>
+      <div className="h-12" />
+      <p className="font-semibold text-neutral-900 underline decoration-neutral-400 underline-offset-4">{nama}</p>
+      {nip && <p className="text-[10px] text-neutral-500">NIP. {nip}</p>}
+    </div>
+  );
+}
+
 export function CertificateView({ data }: { data: CertificateData }) {
   return (
     <div className="relative mx-auto aspect-[297/210] w-full max-w-[1100px] overflow-hidden rounded-md bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5 print:m-0 print:aspect-auto print:h-[210mm] print:w-[297mm] print:max-w-none print:rounded-none print:shadow-none print:ring-0">
@@ -103,13 +131,13 @@ export function CertificateView({ data }: { data: CertificateData }) {
             Sertifikat Kompetensi
           </h1>
           <p className="text-xs text-neutral-500 sm:text-sm">Dengan ini menyatakan bahwa</p>
-          <p className="font-serif text-3xl font-bold text-indigo-700 sm:text-4xl">{data.namaSiswa}</p>
+          <p className="font-serif text-3xl font-bold text-neutral-900 sm:text-4xl">{data.namaSiswa}</p>
           <p className="max-w-xl text-xs text-neutral-500 sm:text-sm">
             telah dinyatakan <span className="font-semibold text-neutral-900">LULUS</span> dalam uji kompetensi
           </p>
           <p className="text-base font-bold text-neutral-900 sm:text-lg">{data.judulKompetensi}</p>
 
-          {data.rincianTes.length > 0 && (
+          {data.rincianTes.length > 0 ? (
             <div className="mt-1 flex w-full max-w-md flex-col gap-0.5 rounded-lg border border-indigo-700/15 bg-indigo-700/[0.03] px-4 py-2">
               {data.rincianTes.map((t, idx) => (
                 <div key={idx} className="flex items-center justify-between gap-3 text-[11px] sm:text-xs">
@@ -119,35 +147,32 @@ export function CertificateView({ data }: { data: CertificateData }) {
               ))}
               <div className="mt-1 flex items-center justify-between gap-3 border-t border-indigo-700/15 pt-1 text-xs font-bold sm:text-sm">
                 <span className="text-neutral-900">Nilai Akhir</span>
-                <span className="text-indigo-700">{data.nilai ?? "-"}</span>
+                <span className="text-neutral-900">{data.nilai ?? "-"}</span>
               </div>
             </div>
+          ) : (
+            data.nilai != null && (
+              <div className="mt-1 flex w-full max-w-xs items-center justify-between gap-3 rounded-lg border border-indigo-700/15 bg-indigo-700/[0.03] px-4 py-1.5 text-xs font-bold sm:text-sm">
+                <span className="text-neutral-900">Nilai Akhir</span>
+                <span className="text-neutral-900">{data.nilai}</span>
+              </div>
+            )
           )}
         </div>
 
         <div className="flex w-full items-end justify-between gap-6">
-          <div className="flex flex-col items-start gap-0.5 text-left text-[11px] text-neutral-500">
-            <p>No. Sertifikat: <span className="font-mono text-neutral-900">{data.nomorSertifikat ?? "-"}</span></p>
-            <p>Kode Verifikasi: <span className="font-mono text-neutral-900">{data.kodeVerifikasi ?? "-"}</span></p>
-            <p>
-              Tanggal Terbit:{" "}
-              <span className="text-neutral-900">
-                {data.tanggalTerbit ? new Date(data.tanggalTerbit).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "-"}
-              </span>
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center gap-1">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={data.qrDataUrl} alt="QR Verifikasi" className="size-16 rounded-md border border-neutral-300 bg-white p-1" />
-            <p className="text-[9px] text-neutral-500">Pindai untuk verifikasi</p>
-          </div>
-
-          <div className="flex flex-col items-center gap-1 text-center">
-            <p className="font-serif text-2xl italic text-indigo-700">{data.namaKajur ?? ""}</p>
-            <div className="h-px w-36 bg-neutral-900/40" />
-            <p className="text-xs text-neutral-500">{data.jabatanKajur ?? "Kepala Jurusan"}</p>
-          </div>
+          {data.namaKepsek ? (
+            <>
+              <TandaTangan jabatan={data.jabatanKajur ?? "Kepala Jurusan"} nama={data.namaKajur ?? ""} nip={data.nipKajur} />
+              <InfoSertifikat nomor={data.nomorSertifikat} tanggal={data.tanggalTerbit} qrDataUrl={data.qrDataUrl} />
+              <TandaTangan jabatan="Kepala Sekolah" nama={data.namaKepsek} nip={data.nipKepsek} />
+            </>
+          ) : (
+            <>
+              <InfoSertifikat nomor={data.nomorSertifikat} tanggal={data.tanggalTerbit} qrDataUrl={data.qrDataUrl} />
+              <TandaTangan jabatan={data.jabatanKajur ?? "Kepala Jurusan"} nama={data.namaKajur ?? ""} nip={data.nipKajur} />
+            </>
+          )}
         </div>
       </div>
     </div>

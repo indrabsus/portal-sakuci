@@ -12,6 +12,7 @@ export type CurrentProfile = {
   id_guru: string | null;
   id_siswa: string | null;
   id_jurusan: string | null;
+  nip_nuptk: string | null;
 };
 
 export async function getCurrentProfile(): Promise<CurrentProfile | null> {
@@ -21,7 +22,7 @@ export async function getCurrentProfile(): Promise<CurrentProfile | null> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id_profile, nama_lengkap, email, foto, aktif, id_jurusan, roles(nama_role)")
+    .select("id_profile, nama_lengkap, email, foto, aktif, id_jurusan, nip_nuptk, roles(nama_role)")
     .eq("id_profile", user.id)
     .single();
 
@@ -48,6 +49,7 @@ export async function getCurrentProfile(): Promise<CurrentProfile | null> {
     id_guru: akunGuru?.id_guru ?? null,
     id_siswa: akunSiswa?.id_siswa ?? null,
     id_jurusan: profile.id_jurusan ?? null,
+    nip_nuptk: profile.nip_nuptk ?? null,
   };
 }
 
