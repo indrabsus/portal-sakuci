@@ -16,6 +16,11 @@ type CertificateData = {
   statusLulus: boolean;
 };
 
+function formatNamaSiswa(nama: string): string {
+  if (!nama || nama !== nama.toUpperCase()) return nama;
+  return nama.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+}
+
 function CircuitOverlay() {
   return (
     <svg
@@ -84,13 +89,30 @@ function InfoSertifikat({ nomor, tanggal, qrDataUrl }: { nomor: string | null; t
   );
 }
 
-function TandaTangan({ jabatan, nama, nip }: { jabatan: string; nama: string; nip?: string | null }) {
+function TandaTangan({
+  jabatan,
+  nama,
+  nip,
+  nipLabel = "NIP",
+  digitalQrDataUrl,
+}: {
+  jabatan: string;
+  nama: string;
+  nip?: string | null;
+  nipLabel?: string;
+  digitalQrDataUrl?: string;
+}) {
   return (
     <div className="flex flex-col items-center gap-1 text-center">
       <p className="text-xs text-neutral-500">{jabatan}</p>
-      <div className="h-12" />
+      <div className="flex h-12 items-center justify-center">
+        {digitalQrDataUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={digitalQrDataUrl} alt="Tanda Tangan Digital" className="size-12" />
+        )}
+      </div>
       <p className="font-semibold text-neutral-900 underline decoration-neutral-400 underline-offset-4">{nama}</p>
-      {nip && <p className="text-[10px] text-neutral-500">NIP. {nip}</p>}
+      {nip && <p className="text-[10px] text-neutral-500">{nipLabel}. {nip}</p>}
     </div>
   );
 }
@@ -131,7 +153,7 @@ export function CertificateView({ data }: { data: CertificateData }) {
             Sertifikat Kompetensi
           </h1>
           <p className="text-xs text-neutral-500 sm:text-sm">Dengan ini menyatakan bahwa</p>
-          <p className="font-serif text-3xl font-bold text-neutral-900 sm:text-4xl">{data.namaSiswa}</p>
+          <p className="font-(family-name:--font-certificate) text-4xl leading-tight text-neutral-900 sm:text-5xl">{formatNamaSiswa(data.namaSiswa)}</p>
           <p className="max-w-xl text-xs text-neutral-500 sm:text-sm">
             telah dinyatakan <span className="font-semibold text-neutral-900">LULUS</span> dalam uji kompetensi
           </p>
@@ -163,14 +185,25 @@ export function CertificateView({ data }: { data: CertificateData }) {
         <div className="flex w-full items-end justify-between gap-6">
           {data.namaKepsek ? (
             <>
-              <TandaTangan jabatan={data.jabatanKajur ?? "Kepala Jurusan"} nama={data.namaKajur ?? ""} nip={data.nipKajur} />
+              <TandaTangan
+                jabatan={data.jabatanKajur ?? "Kepala Jurusan"}
+                nama={data.namaKajur ?? ""}
+                nip={data.nipKajur}
+                nipLabel="NIP/NUPTK"
+              />
               <InfoSertifikat nomor={data.nomorSertifikat} tanggal={data.tanggalTerbit} qrDataUrl={data.qrDataUrl} />
               <TandaTangan jabatan="Kepala Sekolah" nama={data.namaKepsek} nip={data.nipKepsek} />
             </>
           ) : (
             <>
               <InfoSertifikat nomor={data.nomorSertifikat} tanggal={data.tanggalTerbit} qrDataUrl={data.qrDataUrl} />
-              <TandaTangan jabatan={data.jabatanKajur ?? "Kepala Jurusan"} nama={data.namaKajur ?? ""} nip={data.nipKajur} />
+              <TandaTangan
+                jabatan={data.jabatanKajur ?? "Kepala Jurusan"}
+                nama={data.namaKajur ?? ""}
+                nip={data.nipKajur}
+                nipLabel="NIP/NUPTK"
+                digitalQrDataUrl={data.qrDataUrl}
+              />
             </>
           )}
         </div>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Geist_Mono, Lavishly_Yours } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TopLoadingBar } from "@/components/top-loading-bar";
 import { Toaster } from "@/components/ui/sonner";
@@ -14,6 +14,12 @@ const fontSans = Plus_Jakarta_Sans({
 const fontMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const fontCertificate = Lavishly_Yours({
+  variable: "--font-certificate",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -34,7 +40,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${fontSans.variable} ${fontMono.variable} h-full antialiased`}
+      className={`${fontSans.variable} ${fontMono.variable} ${fontCertificate.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
