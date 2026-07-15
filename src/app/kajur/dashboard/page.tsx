@@ -22,7 +22,7 @@ async function getCounts(idJurusan: string) {
   const safeIds = idKompetensiList.length ? idKompetensiList : [""];
 
   const [sertifikatAktif, menungguValidasi, soal] = await Promise.all([
-    supabase.from("sertifikat").select("id_sertifikat", { count: "exact", head: true }).eq("status", "aktif").in("id_kompetensi", safeIds),
+    supabase.from("sertifikat").select("id_sertifikat", { count: "exact", head: true }).eq("status", "aktif").eq("id_jurusan", idJurusan),
     supabase.from("progres_kompetensi").select("id_progres", { count: "exact", head: true }).eq("status", "proses").in("id_kompetensi", safeIds),
     supabase.from("soal_kompetensi").select("id_soal_kompetensi", { count: "exact", head: true }).eq("id_jurusan", idJurusan),
   ]);

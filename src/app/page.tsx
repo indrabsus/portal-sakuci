@@ -76,7 +76,7 @@ export default async function HomePage() {
     admin
       .from("sertifikat")
       .select(
-        "id_sertifikat, nilai, tanggal_terbit, siswa(nama_lengkap, foto_url, siswa_kelas(aktif, kelas(nama_kelas, tingkat))), kompetensi(judul)",
+        "id_sertifikat, judul_manual, tanggal_terbit, siswa(nama_lengkap, foto_url, siswa_kelas(aktif, kelas(nama_kelas, tingkat))), kompetensi(judul)",
       )
       .eq("status", "aktif")
       .order("tanggal_terbit", { ascending: false })
@@ -309,6 +309,7 @@ export default async function HomePage() {
                   siswa_kelas: { aktif: boolean; kelas: { nama_kelas: string; tingkat: number | null } | null }[] | null;
                 } | null;
                 const kompetensi = s.kompetensi as unknown as { judul: string } | null;
+                const judul = kompetensi?.judul ?? s.judul_manual ?? "-";
                 const kelas = siswa?.siswa_kelas?.find((sk) => sk.aktif)?.kelas ?? null;
                 const kelasLabel = kelas ? (kelas.tingkat ? `${kelas.tingkat} ${kelas.nama_kelas}` : kelas.nama_kelas) : null;
                 return (
@@ -321,7 +322,7 @@ export default async function HomePage() {
                       {kelasLabel && <p className="text-xs text-muted-foreground">{kelasLabel}</p>}
                       <div className="flex items-center gap-1 text-xs text-primary">
                         <Award className="size-3" />
-                        {kompetensi?.judul ?? "-"}
+                        {judul}
                       </div>
                     </CardContent>
                   </Card>
