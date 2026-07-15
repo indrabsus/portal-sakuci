@@ -35,5 +35,7 @@ export default async function SiswaPage() {
     kelas_terkini: kelasMap.get(s.id_siswa) ?? null,
   }));
 
-  return <SiswaClient rows={rows} />;
+  const kelasOptions = Array.from(new Set(Array.from(kelasMap.values()).filter((k): k is string => !!k))).sort();
+
+  return <SiswaClient rows={rows} kelasOptions={kelasOptions} />;
 }

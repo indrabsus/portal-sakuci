@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SimpleCrud } from "@/components/simple-crud";
 import { createSiswa, updateSiswa, deleteSiswa, resetPasswordSiswa } from "./actions";
 
@@ -35,23 +36,28 @@ function formatTtl(tempat: string | null, tanggal: string | null) {
   return "-";
 }
 
-export function SiswaClient({ rows }: { rows: Siswa[] }) {
+const SEMUA_KELAS = "__semua__";
+
+export function SiswaClient({ rows, kelasOptions }: { rows: Siswa[]; kelasOptions: string[] }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [filterKelas, setFilterKelas] = useState(SEMUA_KELAS);
   const [resetTarget, setResetTarget] = useState<Siswa | null>(null);
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    if (!q) return rows;
-    return rows.filter(
-      (r) =>
+    return rows.filter((r) => {
+      const matchKelas = filterKelas === SEMUA_KELAS || r.kelas_terkini === filterKelas;
+      const matchSearch =
+        !q ||
         r.nama_lengkap.toLowerCase().includes(q) ||
         (r.nisn ?? "").toLowerCase().includes(q) ||
-        (r.kelas_terkini ?? "").toLowerCase().includes(q),
-    );
-  }, [rows, search]);
+        (r.kelas_terkini ?? "").toLowerCase().includes(q);
+      return matchKelas && matchSearch;
+    });
+  }, [rows, search, filterKelas]);
 
   function handleReset() {
     if (!resetTarget?.id_profile || !resetTarget.nisn) return;
@@ -68,14 +74,31 @@ export function SiswaClient({ rows }: { rows: Siswa[] }) {
 
   return (
     <>
-      <div className="relative w-full sm:max-w-xs">
-        <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Cari nama, NISN, atau kelas..."
-          className="pl-8"
-        />
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Cari nama, NISN, atau kelas..."
+            className="pl-8"
+          />
+        </div>
+        <Select value={filterKelas} onValueChange={(v) => setFilterKelas(v ?? SEMUA_KELAS)}>
+          <SelectTrigger className="w-full sm:w-44">
+            <SelectValue>{filterKelas === SEMUA_KELAS ? "Semua Kelas" : filterKelas}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={SEMUA_KELAS} label="Semua Kelas">
+              Semua Kelas
+            </SelectItem>
+            {kelasOptions.map((k) => (
+              <SelectItem key={k} value={k} label={k}>
+                {k}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <SimpleCrud<Siswa>
