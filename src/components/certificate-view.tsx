@@ -125,7 +125,11 @@ export function CertificateView({ data }: { data: CertificateData }) {
           )}
         </div>
 
-        <div className="mt-auto flex w-full -translate-y-5 items-end gap-6 px-6 sm:px-10">
+        <div
+          className={`mt-auto flex w-full items-end gap-6 px-6 sm:px-10 ${
+            data.rincianTes.length > 0 ? "-translate-y-5" : "-translate-y-10"
+          }`}
+        >
           {data.namaKepsek ? (
             <>
               <div className="flex flex-1 justify-center">

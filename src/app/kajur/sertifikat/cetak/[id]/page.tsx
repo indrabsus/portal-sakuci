@@ -18,7 +18,7 @@ export default async function CetakSertifikatPage({ params }: { params: Promise<
     supabase
       .from("sertifikat")
       .select(
-        "id_sertifikat, id_siswa, id_kompetensi, judul_manual, nomor_sertifikat, nilai, tanggal_terbit, kode_verifikasi, nama_kajur, jabatan_kajur, nip_kajur, nama_kepsek, nip_kepsek, siswa(nama_lengkap), kompetensi(judul, syarat_lulus)",
+        "id_sertifikat, id_siswa, id_kompetensi, judul_manual, nomor_sertifikat, nilai, tanggal_terbit, kode_verifikasi, nama_kajur, jabatan_kajur, nip_kajur, diterbitkan_oleh, nama_kepsek, nip_kepsek, siswa(nama_lengkap), kompetensi(judul, syarat_lulus)",
       )
       .eq("id_sertifikat", id)
       .single(),
@@ -36,6 +36,8 @@ export default async function CetakSertifikatPage({ params }: { params: Promise<
       judul_manual: sertifikat.judul_manual,
       nilai: sertifikat.nilai,
       jabatan_kajur: sertifikat.jabatan_kajur,
+      nip_kajur: sertifikat.nip_kajur,
+      diterbitkan_oleh: sertifikat.diterbitkan_oleh,
       kompetensi: sertifikat.kompetensi as unknown as { judul: string; syarat_lulus: number } | null,
     }),
   ]);
@@ -60,7 +62,7 @@ export default async function CetakSertifikatPage({ params }: { params: Promise<
           tanggalTerbit: sertifikat.tanggal_terbit,
           namaKajur: sertifikat.nama_kajur,
           jabatanKajur: resolved.jabatanKajur,
-          nipKajur: sertifikat.nip_kajur,
+          nipKajur: resolved.nipKajur,
           namaKepsek: sertifikat.nama_kepsek,
           nipKepsek: sertifikat.nip_kepsek,
           qrDataUrl,
