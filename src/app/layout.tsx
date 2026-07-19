@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Geist_Mono, Lavishly_Yours } from "next/font/google";
+import { Plus_Jakarta_Sans, Geist_Mono, Italianno } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TopLoadingBar } from "@/components/top-loading-bar";
 import { Toaster } from "@/components/ui/sonner";
@@ -16,7 +16,7 @@ const fontMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const fontCertificate = Lavishly_Yours({
+const fontCertificate = Italianno({
   variable: "--font-certificate",
   subsets: ["latin"],
   weight: "400",

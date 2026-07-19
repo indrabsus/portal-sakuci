@@ -21,60 +21,6 @@ function formatNamaSiswa(nama: string): string {
   return nama.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 }
 
-function CircuitOverlay() {
-  return (
-    <svg
-      className="pointer-events-none absolute inset-0 h-full w-full text-indigo-700 opacity-[0.12]"
-      viewBox="0 0 1000 700"
-      preserveAspectRatio="none"
-      aria-hidden
-    >
-      {/* Pojok kiri atas */}
-      <path
-        d="M0 0 V90 H70 L100 120 H260 L290 150 H380 M0 40 H30 L50 60 H140 M0 160 H40 V200 H180"
-        stroke="currentColor"
-        strokeWidth="2"
-        fill="none"
-      />
-      <circle cx="100" cy="120" r="5" fill="currentColor" />
-      <circle cx="260" cy="120" r="3" fill="currentColor" />
-      <circle cx="380" cy="150" r="4" fill="currentColor" />
-      <circle cx="140" cy="60" r="3" fill="currentColor" />
-      <circle cx="180" cy="200" r="3" fill="currentColor" />
-
-      {/* Pojok kanan bawah */}
-      <path
-        d="M1000 700 V610 H930 L900 580 H740 L710 550 H620 M1000 660 H970 L950 640 H860 M1000 540 H960 V500 H820"
-        stroke="currentColor"
-        strokeWidth="2"
-        fill="none"
-      />
-      <circle cx="900" cy="580" r="5" fill="currentColor" />
-      <circle cx="740" cy="580" r="3" fill="currentColor" />
-      <circle cx="620" cy="550" r="4" fill="currentColor" />
-      <circle cx="860" cy="640" r="3" fill="currentColor" />
-      <circle cx="820" cy="500" r="3" fill="currentColor" />
-
-      {/* Pojok kanan atas & kiri bawah, lebih ringan */}
-      <path d="M1000 0 V60 H940 L920 80 H840 M1000 100 H980" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.7" />
-      <circle cx="940" cy="60" r="3" fill="currentColor" opacity="0.7" />
-      <circle cx="840" cy="80" r="3" fill="currentColor" opacity="0.7" />
-      <path d="M0 700 V640 H60 L80 620 H160 M0 600 H20" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.7" />
-      <circle cx="60" cy="640" r="3" fill="currentColor" opacity="0.7" />
-      <circle cx="160" cy="620" r="3" fill="currentColor" opacity="0.7" />
-    </svg>
-  );
-}
-
-function CornerOrnament({ className }: { className: string }) {
-  return (
-    <svg viewBox="0 0 60 60" className={className} aria-hidden>
-      <path d="M2 30 V2 H30" stroke="currentColor" strokeWidth="2" fill="none" />
-      <path d="M2 30 V10 H10 M2 30 H22 V22" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.6" />
-    </svg>
-  );
-}
-
 function InfoSertifikat({ nomor, tanggal, qrDataUrl }: { nomor: string | null; tanggal: string | null; qrDataUrl: string }) {
   return (
     <div className="flex flex-col items-center gap-1 text-center">
@@ -104,15 +50,15 @@ function TandaTangan({
 }) {
   return (
     <div className="flex flex-col items-center gap-1 text-center">
-      <p className="text-xs text-neutral-500">{jabatan}</p>
+      <p className="whitespace-nowrap text-xs text-neutral-500">{jabatan}</p>
       <div className="flex h-12 items-center justify-center">
         {digitalQrDataUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={digitalQrDataUrl} alt="Tanda Tangan Digital" className="size-12" />
         )}
       </div>
-      <p className="font-semibold text-neutral-900 underline decoration-neutral-400 underline-offset-4">{nama}</p>
-      {nip && <p className="text-[10px] text-neutral-500">{nipLabel}. {nip}</p>}
+      <p className="whitespace-nowrap font-semibold text-neutral-900 underline decoration-neutral-400 underline-offset-4">{nama}</p>
+      <p className={`whitespace-nowrap text-[10px] text-neutral-500 ${nip ? "" : "invisible"}`}>{nipLabel}. {nip ?? "-"}</p>
     </div>
   );
 }
@@ -120,17 +66,14 @@ function TandaTangan({
 export function CertificateView({ data }: { data: CertificateData }) {
   return (
     <div className="relative mx-auto aspect-[297/210] w-full max-w-[1100px] overflow-hidden rounded-md bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5 print:m-0 print:aspect-auto print:h-[210mm] print:w-[297mm] print:max-w-none print:rounded-none print:shadow-none print:ring-0">
-      {/* Border elegan */}
-      <div className="absolute inset-[14px] border-[3px] border-double border-indigo-700/40" />
-      <div className="absolute inset-[22px] border border-indigo-700/20" />
-
-      {/* Ornamen pojok */}
-      <CornerOrnament className="absolute left-6 top-6 size-10 text-indigo-700/50" />
-      <CornerOrnament className="absolute right-6 top-6 size-10 rotate-90 text-indigo-700/50" />
-      <CornerOrnament className="absolute bottom-6 left-6 size-10 -rotate-90 text-indigo-700/50" />
-      <CornerOrnament className="absolute bottom-6 right-6 size-10 rotate-180 text-indigo-700/50" />
-
-      <CircuitOverlay />
+      {/* Template border & watermark */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/sertifikat-bg.png"
+        alt=""
+        aria-hidden
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+      />
 
       {!data.statusLulus && (
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
@@ -140,41 +83,41 @@ export function CertificateView({ data }: { data: CertificateData }) {
         </div>
       )}
 
-      <div className="absolute inset-0 flex flex-col items-center justify-between px-14 py-10 text-center sm:px-20 sm:py-12">
-        <div className="flex w-full flex-col items-center gap-1.5">
+      <div className="absolute inset-0 flex flex-col items-center px-16 py-8 text-center sm:px-24 sm:py-10">
+        <div className="mt-5 flex w-full flex-col items-center gap-1.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Logo Sekolah" className="h-14 w-auto object-contain" />
-          <p className="mt-1 text-sm font-bold uppercase tracking-[0.15em] text-neutral-900">{data.namaSekolah}</p>
-          <div className="mt-1 h-px w-44 bg-indigo-700/40" />
+          <img src="/logo.png" alt="Logo Sekolah" className="h-20 w-auto translate-y-0.5 object-contain sm:h-24" />
+          <p className="mt-1 text-base font-bold uppercase tracking-[0.15em] text-neutral-900 sm:text-lg">{data.namaSekolah}</p>
+          <div className="mt-1 h-px w-28 bg-[#c9a227]" />
         </div>
 
-        <div className="flex flex-col items-center gap-2">
-          <h1 className="text-xl font-extrabold uppercase tracking-[0.2em] text-neutral-900 sm:text-2xl">
+        <div className="mt-2 flex flex-col items-center gap-2 sm:mt-3">
+          <h1 className="text-xl font-extrabold uppercase tracking-[0.08em] text-neutral-900 sm:text-2xl">
             Sertifikat Kompetensi
           </h1>
           <p className="text-xs text-neutral-500 sm:text-sm">Dengan ini menyatakan bahwa</p>
-          <p className="font-(family-name:--font-certificate) text-4xl leading-tight text-neutral-900 sm:text-5xl">{formatNamaSiswa(data.namaSiswa)}</p>
+          <p className="font-(family-name:--font-certificate) text-5xl leading-tight text-neutral-900 sm:text-6xl">{formatNamaSiswa(data.namaSiswa)}</p>
           <p className="max-w-xl text-xs text-neutral-500 sm:text-sm">
             telah dinyatakan <span className="font-semibold text-neutral-900">LULUS</span> dalam uji kompetensi
           </p>
           <p className="text-base font-bold text-neutral-900 sm:text-lg">{data.judulKompetensi}</p>
 
           {data.rincianTes.length > 0 ? (
-            <div className="mt-1 flex w-full max-w-md flex-col gap-0.5 rounded-lg border border-indigo-700/15 bg-indigo-700/[0.03] px-4 py-2">
+            <div className="mt-1 flex w-full max-w-md flex-col gap-0.5 rounded-lg border border-[rgba(201,162,39,0.5)] bg-[rgba(201,162,39,0.05)] px-4 py-2">
               {data.rincianTes.map((t, idx) => (
                 <div key={idx} className="flex items-center justify-between gap-3 text-[11px] sm:text-xs">
                   <span className="text-neutral-500">{t.judul}</span>
                   <span className="font-semibold text-neutral-900">{t.nilai ?? "-"}</span>
                 </div>
               ))}
-              <div className="mt-1 flex items-center justify-between gap-3 border-t border-indigo-700/15 pt-1 text-xs font-bold sm:text-sm">
+              <div className="mt-1 flex items-center justify-between gap-3 border-t border-[rgba(201,162,39,0.5)] pt-1 text-xs font-bold sm:text-sm">
                 <span className="text-neutral-900">Nilai Akhir</span>
                 <span className="text-neutral-900">{data.nilai ?? "-"}</span>
               </div>
             </div>
           ) : (
             data.nilai != null && (
-              <div className="mt-1 flex w-full max-w-xs items-center justify-between gap-3 rounded-lg border border-indigo-700/15 bg-indigo-700/[0.03] px-4 py-1.5 text-xs font-bold sm:text-sm">
+              <div className="mt-1 flex w-full max-w-xs items-center justify-between gap-3 rounded-lg border border-[rgba(201,162,39,0.5)] bg-[rgba(201,162,39,0.05)] px-4 py-1.5 text-xs font-bold sm:text-sm">
                 <span className="text-neutral-900">Nilai Akhir</span>
                 <span className="text-neutral-900">{data.nilai}</span>
               </div>
@@ -182,28 +125,34 @@ export function CertificateView({ data }: { data: CertificateData }) {
           )}
         </div>
 
-        <div className="flex w-full items-end justify-between gap-6">
+        <div className="mt-auto flex w-full -translate-y-5 items-end gap-6 px-6 sm:px-10">
           {data.namaKepsek ? (
             <>
-              <TandaTangan
-                jabatan={data.jabatanKajur ?? "Kepala Jurusan"}
-                nama={data.namaKajur ?? ""}
-                nip={data.nipKajur}
-                nipLabel="NIP/NUPTK"
-              />
+              <div className="flex flex-1 justify-center">
+                <TandaTangan
+                  jabatan={data.jabatanKajur ?? "Kepala Jurusan"}
+                  nama={data.namaKajur ?? ""}
+                  nip={data.nipKajur}
+                  nipLabel="NIP/NUPTK"
+                />
+              </div>
               <InfoSertifikat nomor={data.nomorSertifikat} tanggal={data.tanggalTerbit} qrDataUrl={data.qrDataUrl} />
-              <TandaTangan jabatan="Kepala Sekolah" nama={data.namaKepsek} nip={data.nipKepsek} />
+              <div className="flex flex-1 justify-center">
+                <TandaTangan jabatan="Kepala Satuan Pendidikan" nama={data.namaKepsek} nip={data.nipKepsek} />
+              </div>
             </>
           ) : (
             <>
               <InfoSertifikat nomor={data.nomorSertifikat} tanggal={data.tanggalTerbit} qrDataUrl={data.qrDataUrl} />
-              <TandaTangan
-                jabatan={data.jabatanKajur ?? "Kepala Jurusan"}
-                nama={data.namaKajur ?? ""}
-                nip={data.nipKajur}
-                nipLabel="NIP/NUPTK"
-                digitalQrDataUrl={data.qrDataUrl}
-              />
+              <div className="flex flex-1 justify-end">
+                <TandaTangan
+                  jabatan={data.jabatanKajur ?? "Kepala Jurusan"}
+                  nama={data.namaKajur ?? ""}
+                  nip={data.nipKajur}
+                  nipLabel="NIP/NUPTK"
+                  digitalQrDataUrl={data.qrDataUrl}
+                />
+              </div>
             </>
           )}
         </div>
