@@ -24,7 +24,7 @@ export function TopBar({
   notifSlot?: React.ReactNode;
 }) {
   return (
-    <header className="flex h-14 items-center justify-between gap-2 border-b bg-background/80 px-3 backdrop-blur-sm sm:px-6">
+    <header className="dark flex h-14 items-center justify-between gap-2 border-b bg-black px-3 text-foreground sm:px-6">
       <div className="flex min-w-0 items-center gap-2">
         <MobileNav title={navTitle} items={navItems} />
         {onToggleSidebar && (

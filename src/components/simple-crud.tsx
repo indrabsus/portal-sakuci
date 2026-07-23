@@ -48,6 +48,12 @@ export type SimpleCrudAction = (
   formData: FormData,
 ) => Promise<{ success: boolean; message: string }>;
 
+export type SelectionControls = {
+  selectedIds: Set<string>;
+  onToggle: (id: string) => void;
+  onToggleAll: (ids: string[], checked: boolean) => void;
+};
+
 export function SimpleCrud<T extends Record<string, unknown>>({
   title,
   idKey,
@@ -58,6 +64,7 @@ export function SimpleCrud<T extends Record<string, unknown>>({
   updateAction,
   deleteAction,
   renderExtraActions,
+  selection,
 }: {
   title: string;
   idKey: keyof T & string;
@@ -73,6 +80,8 @@ export function SimpleCrud<T extends Record<string, unknown>>({
   updateAction: SimpleCrudAction;
   deleteAction: SimpleCrudAction;
   renderExtraActions?: (row: T) => React.ReactNode;
+  /** Tampilkan kolom centang di awal tabel (per-halaman) untuk aksi massal di luar komponen ini. */
+  selection?: SelectionControls;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -81,6 +90,8 @@ export function SimpleCrud<T extends Record<string, unknown>>({
   const [deleteTarget, setDeleteTarget] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const table = useTableControls<T>(rows);
+  const pageIds = table.rows.map((row) => String(row[idKey]));
+  const allPageSelected = selection ? pageIds.length > 0 && pageIds.every((id) => selection.selectedIds.has(id)) : false;
 
   function openCreate() {
     setEditing(null);
@@ -138,6 +149,17 @@ export function SimpleCrud<T extends Record<string, unknown>>({
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40">
+                {selection && (
+                  <TableHead className="w-10">
+                    <input
+                      type="checkbox"
+                      checked={allPageSelected}
+                      onChange={(e) => selection.onToggleAll(pageIds, e.target.checked)}
+                      className="h-4 w-4 rounded"
+                      aria-label="Pilih semua di halaman ini"
+                    />
+                  </TableHead>
+                )}
                 {columns.map((col) =>
                   col.sortable === false ? (
                     <TableHead key={col.key} className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -162,13 +184,26 @@ export function SimpleCrud<T extends Record<string, unknown>>({
             <TableBody>
               {table.rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={columns.length + 1} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={columns.length + 1 + (selection ? 1 : 0)} className="h-24 text-center text-muted-foreground">
                     Belum ada data
                   </TableCell>
                 </TableRow>
               )}
-              {table.rows.map((row) => (
-                <TableRow key={String(row[idKey])} className="transition-colors hover:bg-accent/40">
+              {table.rows.map((row) => {
+                const rowId = String(row[idKey]);
+                return (
+                <TableRow key={rowId} className="transition-colors hover:bg-accent/40">
+                  {selection && (
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        checked={selection.selectedIds.has(rowId)}
+                        onChange={() => selection.onToggle(rowId)}
+                        className="h-4 w-4 rounded"
+                        aria-label="Pilih baris"
+                      />
+                    </TableCell>
+                  )}
                   {columns.map((col) => (
                     <TableCell key={col.key}>
                       {col.render ? col.render(row) : String(row[col.key] ?? "-")}
@@ -192,7 +227,8 @@ export function SimpleCrud<T extends Record<string, unknown>>({
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         </div>

@@ -3,6 +3,7 @@
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { normalizeWaNumber, sendWaMessage } from "@/lib/wa";
 
 type ActionResult = { success: boolean; message: string };
 
@@ -174,53 +175,6 @@ export async function aktivasiMassalGuru(
   }
 
   return hasil;
-}
-
-function normalizeWaNumber(value: string | null) {
-  const digits = value?.replace(/\D/g, "") ?? "";
-  if (!digits) return null;
-  if (digits.startsWith("0")) return `62${digits.slice(1)}`;
-  if (digits.startsWith("62")) return digits;
-  return digits;
-}
-
-async function sendWaMessage(nomor: string, pesan: string) {
-  const apiBase = process.env.NEXT_PUBLIC_API_WA?.trim();
-  if (!apiBase) {
-    throw new Error("Variabel NEXT_PUBLIC_API_WA belum diatur.");
-  }
-
-  const endpoint = `${apiBase.replace(/\/$/, "")}/notifuser`;
-  const attempts = 2;
-
-  for (let attempt = 1; attempt <= attempts; attempt++) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nomor, pesan }),
-        signal: controller.signal,
-        cache: "no-store",
-      });
-
-      if (!response.ok) {
-        const detail = await response.text().catch(() => "");
-        throw new Error(`${response.status}${detail ? ` ${detail}` : ""}`.trim());
-      }
-
-      return;
-    } catch (error) {
-      if (attempt === attempts) {
-        const message = error instanceof Error ? error.message : "Tidak diketahui";
-        throw new Error(`Gagal mengirim ke ${nomor}: ${message}`);
-      }
-    } finally {
-      clearTimeout(timeout);
-    }
-  }
 }
 
 export async function createGuru(formData: FormData): Promise<ActionResult> {

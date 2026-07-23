@@ -106,7 +106,7 @@ export function SidebarNav({ title, items, collapsed = false }: { title: string;
   }
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r bg-sidebar md:flex">
+    <aside className="dark hidden w-60 shrink-0 flex-col border-r bg-black text-foreground md:flex">
       <div className="flex h-14 items-center border-b px-5">
         <p className="text-lg font-bold tracking-tight">{title}</p>
       </div>
@@ -130,7 +130,7 @@ export function MobileNav({ title, items }: { title: string; items: NavItem[] })
       >
         <Menu className="size-5" />
       </Button>
-      <SheetContent side="left" className="flex w-3/4 max-w-xs flex-col p-0">
+      <SheetContent side="left" className="dark flex w-3/4 max-w-xs flex-col bg-black p-0 text-foreground">
         <SheetHeader className="border-b px-5 py-0">
           <SheetTitle className="flex h-14 items-center text-lg font-bold tracking-tight">
             {title}
