@@ -1,16 +1,19 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Search, SendHorizonal } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Printer, Search, SendHorizonal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SimpleCrud } from "@/components/simple-crud";
 import { InitialsAvatar } from "@/components/initials-avatar";
-import { createGuru, updateGuru, deleteGuru, sendWaBulkGuru } from "./actions";
+import { AktivasiMassalDialog } from "./aktivasi-massal";
+import { createGuru, updateGuru, deleteGuru, sendWaBulkGuru, type SaranAktivasiGuru } from "./actions";
 
 type Guru = {
   id_guru: string;
@@ -20,15 +23,22 @@ type Guru = {
   jenkel: string | null;
   foto_url: string | null;
   akun_aktif: boolean;
+  username: string | null;
 };
 
-export function GuruClient({ rows }: { rows: Guru[] }) {
+export function GuruClient({ rows, saran }: { rows: Guru[]; saran: SaranAktivasiGuru[] }) {
+  const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [search, setSearch] = useState("");
   const [isWaModalOpen, setWaModalOpen] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [isSending, startSending] = useTransition();
+
+  const belumAktivasi = useMemo(
+    () => rows.filter((r) => !r.akun_aktif).map((r) => ({ id_guru: r.id_guru, nama_lengkap: r.nama_lengkap })),
+    [rows]
+  );
 
   const filteredRows = useMemo(() => {
     const query = search.toLowerCase();
@@ -63,15 +73,34 @@ export function GuruClient({ rows }: { rows: Guru[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <div className="no-print flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold">Kirim WhatsApp massal</p>
-          <p className="text-sm text-muted-foreground">Pilih guru dari daftar dan kirim pesan dengan cepat.</p>
+          <p className="text-sm font-semibold">Aktivasi & komunikasi massal</p>
+          <p className="text-sm text-muted-foreground">
+            Aktifkan akun guru yang belum login, atau kirim WhatsApp ke guru terpilih.
+          </p>
         </div>
-        <Button type="button" onClick={() => setWaModalOpen(true)} className="gap-2" disabled={rows.length === 0}>
-          <SendHorizonal className="size-4" />
-          Kirim WhatsApp
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <AktivasiMassalDialog
+            guruBelumAktivasi={belumAktivasi}
+            saran={saran}
+            onSelesai={() => router.refresh()}
+          />
+          <Button type="button" onClick={() => setWaModalOpen(true)} className="gap-2" disabled={rows.length === 0}>
+            <SendHorizonal className="size-4" />
+            Kirim WhatsApp
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => window.print()}
+            className="gap-2"
+            disabled={rows.length === 0}
+          >
+            <Printer className="size-4" />
+            Cetak PDF
+          </Button>
+        </div>
       </div>
 
       {status ? (
@@ -140,6 +169,7 @@ export function GuruClient({ rows }: { rows: Guru[] }) {
         </DialogContent>
       </Dialog>
 
+      <div className="no-print">
       <SimpleCrud<Guru>
         title="Guru"
         idKey="id_guru"
@@ -186,6 +216,29 @@ export function GuruClient({ rows }: { rows: Guru[] }) {
         updateAction={updateGuru}
         deleteAction={deleteGuru}
       />
+      </div>
+
+      <div className="hidden print:block">
+        <h1 className="mb-3 text-lg font-bold">Data Guru</h1>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nama Lengkap</TableHead>
+              <TableHead>Username</TableHead>
+              <TableHead>No HP</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map((r) => (
+              <TableRow key={r.id_guru}>
+                <TableCell>{r.nama_lengkap}</TableCell>
+                <TableCell>{r.username ?? "-"}</TableCell>
+                <TableCell>{r.no_hp ?? "-"}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
