@@ -124,44 +124,47 @@ export function AbsenClient({
   return (
     <div className="flex flex-col gap-4">
       <div className="no-print flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Absen</h1>
-            <p className="text-sm text-muted-foreground">Rekap kehadiran fingerprint Anda per bulan</p>
-          </div>
-          {!error && <PrintButton label="Cetak PDF" onPrint={printPortraitA4} />}
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Absen</h1>
+          <p className="text-sm text-muted-foreground">Rekap kehadiran fingerprint Anda per bulan</p>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <Select disabled={isPending} value={String(bulan)} onValueChange={(v) => v && updateFilter(Number(v), tahun)}>
-            <SelectTrigger className="w-full sm:w-44">
-              <SelectValue>{bulanLabel}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {BULAN_OPTIONS.map((b) => (
-                <SelectItem key={b.value} value={b.value} label={b.label}>{b.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <Card className="shadow-sm">
+          <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Select disabled={isPending} value={String(bulan)} onValueChange={(v) => v && updateFilter(Number(v), tahun)}>
+                <SelectTrigger className="w-full sm:w-44">
+                  <SelectValue>{bulanLabel}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {BULAN_OPTIONS.map((b) => (
+                    <SelectItem key={b.value} value={b.value} label={b.label}>{b.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-          <Select disabled={isPending} value={String(tahun)} onValueChange={(v) => v && updateFilter(bulan, Number(v))}>
-            <SelectTrigger className="w-full sm:w-32">
-              <SelectValue>{tahun}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {tahunOptions().map((y) => (
-                <SelectItem key={y} value={String(y)} label={String(y)}>{y}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+              <Select disabled={isPending} value={String(tahun)} onValueChange={(v) => v && updateFilter(bulan, Number(v))}>
+                <SelectTrigger className="w-full sm:w-32">
+                  <SelectValue>{tahun}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {tahunOptions().map((y) => (
+                    <SelectItem key={y} value={String(y)} label={String(y)}>{y}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-          {isPending && (
-            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Loader2 className="size-4 animate-spin" />
-              Memuat data...
-            </span>
-          )}
-        </div>
+              {isPending && (
+                <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <Loader2 className="size-4 animate-spin" />
+                  Memuat data...
+                </span>
+              )}
+            </div>
+
+            {!error && <PrintButton label="Cetak PDF" onPrint={printPortraitA4} />}
+          </CardContent>
+        </Card>
 
         {error ? (
           <Card className="shadow-sm">
