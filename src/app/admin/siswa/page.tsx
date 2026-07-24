@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { fetchAllRows } from "@/lib/fetch-all";
 import { SiswaClient } from "./client";
+import { getUsernameSaranSiswa } from "./actions";
 
 export default async function SiswaPage() {
   const supabase = await createClient();
@@ -19,6 +20,12 @@ export default async function SiswaPage() {
     ),
   ]);
 
+  const idProfileList = akunList.map((a) => a.id_profile);
+  const { data: profilList } = idProfileList.length
+    ? await supabase.from("profiles").select("id_profile, email").in("id_profile", idProfileList)
+    : { data: [] };
+
+  const emailByProfile = new Map((profilList ?? []).map((p) => [p.id_profile, p.email]));
   const akunMap = new Map(akunList.map((a) => [a.id_siswa, a.id_profile]));
   const kelasMap = new Map(
     kelasList.map((k) => {
@@ -28,14 +35,24 @@ export default async function SiswaPage() {
     }),
   );
 
-  const rows = siswaList.map((s) => ({
-    ...s,
-    akun_aktif: akunMap.has(s.id_siswa),
-    id_profile: akunMap.get(s.id_siswa) ?? null,
-    kelas_terkini: kelasMap.get(s.id_siswa) ?? null,
-  }));
+  const rows = siswaList.map((s) => {
+    const idProfile = akunMap.get(s.id_siswa) ?? null;
+    const email = idProfile ? emailByProfile.get(idProfile) ?? null : null;
+    return {
+      ...s,
+      akun_aktif: akunMap.has(s.id_siswa),
+      id_profile: idProfile,
+      username: email ? email.replace(/@.*$/, "") : null,
+      kelas_terkini: kelasMap.get(s.id_siswa) ?? null,
+    };
+  });
 
   const kelasOptions = Array.from(new Set(Array.from(kelasMap.values()).filter((k): k is string => !!k))).sort();
 
-  return <SiswaClient rows={rows} kelasOptions={kelasOptions} />;
+  const belumAktivasi = rows.filter((s) => !s.akun_aktif);
+  const saran = belumAktivasi.length
+    ? await getUsernameSaranSiswa(belumAktivasi.map((s) => ({ id_siswa: s.id_siswa, nama_lengkap: s.nama_lengkap })))
+    : [];
+
+  return <SiswaClient rows={rows} kelasOptions={kelasOptions} saran={saran} />;
 }

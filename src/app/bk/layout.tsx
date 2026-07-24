@@ -8,7 +8,6 @@ const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/bk/siswa", label: "Siswa", icon: "users" },
   { href: "/bk/konseling", label: "History Konseling", icon: "heart-handshake" },
   { href: "/bk/catatan", label: "Catatan Siswa", icon: "notebook-pen" },
-  { href: "/bk/ganti-password", label: "Ganti Password", icon: "key-round" },
 ];
 
 export default async function BkLayout({ children }: { children: React.ReactNode }) {
@@ -16,7 +15,15 @@ export default async function BkLayout({ children }: { children: React.ReactNode
   const tahunAjaranLabel = await getTahunAjaranAktifLabel();
 
   return (
-    <AppShell title="BK" navItems={NAV_ITEMS} tahunAjaranLabel={tahunAjaranLabel} email={profile.email}>
+    <AppShell
+      title="BK"
+      navItems={NAV_ITEMS}
+      tahunAjaranLabel={tahunAjaranLabel}
+      email={profile.email}
+      namaLengkap={profile.nama_lengkap}
+      fotoUrl={profile.foto}
+      gantiPasswordHref="/bk/ganti-password"
+    >
       {children}
     </AppShell>
   );

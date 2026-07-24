@@ -18,7 +18,6 @@ const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/admin/migrasi-akun", label: "Migrasi Akun", icon: "arrow-right-left" },
   { href: "/admin/reset-password", label: "Reset Password", icon: "key-round" },
   { href: "/admin/backup", label: "Backup & Restore", icon: "database-backup" },
-  { href: "/admin/ganti-password", label: "Ganti Password Saya", icon: "user-circle" },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -26,7 +25,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const tahunAjaranLabel = await getTahunAjaranAktifLabel();
 
   return (
-    <AppShell title="Admin" navItems={NAV_ITEMS} tahunAjaranLabel={tahunAjaranLabel} email={profile.email} currentUserId={profile.id_profile}>
+    <AppShell
+      title="Admin"
+      navItems={NAV_ITEMS}
+      tahunAjaranLabel={tahunAjaranLabel}
+      email={profile.email}
+      namaLengkap={profile.nama_lengkap}
+      fotoUrl={profile.foto}
+      gantiPasswordHref="/admin/ganti-password"
+      currentUserId={profile.id_profile}
+    >
       {children}
     </AppShell>
   );

@@ -6,7 +6,6 @@ import type { NavIconKey } from "@/components/sidebar-nav";
 const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/bkk/dashboard", label: "Dashboard", icon: "dashboard" },
   { href: "/bkk/siswa", label: "Data Siswa", icon: "users" },
-  { href: "/bkk/ganti-password", label: "Ganti Password", icon: "key-round" },
 ];
 
 export default async function BkkLayout({ children }: { children: React.ReactNode }) {
@@ -14,7 +13,16 @@ export default async function BkkLayout({ children }: { children: React.ReactNod
   const tahunAjaranLabel = await getTahunAjaranAktifLabel();
 
   return (
-    <AppShell title="BKK" navItems={NAV_ITEMS} tahunAjaranLabel={tahunAjaranLabel} email={profile.email} currentUserId={profile.id_profile}>
+    <AppShell
+      title="BKK"
+      navItems={NAV_ITEMS}
+      tahunAjaranLabel={tahunAjaranLabel}
+      email={profile.email}
+      namaLengkap={profile.nama_lengkap}
+      fotoUrl={profile.foto}
+      gantiPasswordHref="/bkk/ganti-password"
+      currentUserId={profile.id_profile}
+    >
       {children}
     </AppShell>
   );

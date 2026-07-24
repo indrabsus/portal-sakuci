@@ -4,21 +4,12 @@ import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizeWaNumber, sendWaMessage } from "@/lib/wa";
+import { namaKeUsername, resolveUsernameBentrok, USERNAME_REGEX } from "@/lib/username";
 
 type ActionResult = { success: boolean; message: string };
 
 const SAKUCI_DOMAIN = "sakuci.id";
 const PASSWORD_DEFAULT_GURU = "123456";
-const USERNAME_REGEX = /^[a-z0-9_.]{3,30}$/;
-
-/** Username dari nama_lengkap: huruf kecil, buang spasi & karakter non alfanumerik, ambil 10 karakter pertama. */
-function namaKeUsernameGuru(nama: string): string {
-  const base = nama
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "")
-    .slice(0, 10);
-  return base.length >= 3 ? base : `${base}guru`.slice(0, 10);
-}
 
 export interface SaranAktivasiGuru {
   id_guru: string;
@@ -44,7 +35,7 @@ export async function getUsernameSaranGuru(
   const usedInBatch = new Set<string>();
 
   return daftar.map((g) => {
-    const base = namaKeUsernameGuru(g.nama_lengkap);
+    const base = namaKeUsername(g.nama_lengkap, "guru");
     let candidate = base;
     let i = 1;
     while (usedUsernames.has(candidate) || usedInBatch.has(candidate)) {
@@ -98,8 +89,7 @@ export async function aktivasiMassalGuru(
   for (const item of items) {
     const guru = guruMap.get(item.id_guru);
     const nama = guru?.nama_lengkap ?? "-";
-    const username = item.username.trim().toLowerCase();
-    const email = `${username}@${SAKUCI_DOMAIN}`;
+    let username = item.username.trim().toLowerCase();
 
     if (!guru) {
       hasil.push({ id_guru: item.id_guru, nama_lengkap: nama, username, status: "gagal", pesan: "Data guru tidak ditemukan." });
@@ -122,16 +112,17 @@ export async function aktivasiMassalGuru(
       continue;
     }
 
-    const { data: cekEmail } = await admin
-      .from("profiles")
-      .select("id_profile")
-      .eq("email", email)
-      .maybeSingle();
+    const resolved = await resolveUsernameBentrok(username, SAKUCI_DOMAIN, async (email) => {
+      const { data } = await admin.from("profiles").select("id_profile").eq("email", email).maybeSingle();
+      return !!data;
+    });
 
-    if (cekEmail) {
-      hasil.push({ id_guru: item.id_guru, nama_lengkap: nama, username, status: "gagal", pesan: `Username "${username}" sudah dipakai akun lain.` });
+    if (!resolved) {
+      hasil.push({ id_guru: item.id_guru, nama_lengkap: nama, username, status: "gagal", pesan: `Username "${username}" bentrok dan gagal dibuatkan alternatif.` });
       continue;
     }
+    username = resolved;
+    const email = `${username}@${SAKUCI_DOMAIN}`;
 
     const { data: created, error: createError } = await admin.auth.admin.createUser({
       email,

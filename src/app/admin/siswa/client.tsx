@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Search, KeyRound, SendHorizonal, Trash2, RefreshCcw } from "lucide-react";
+import { Search, KeyRound, Trash2, RefreshCcw, Printer } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -20,18 +18,19 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SimpleCrud } from "@/components/simple-crud";
 import {
   createSiswa,
   updateSiswa,
   deleteSiswa,
   deleteSiswaBulk,
-  sendWaBulkSiswa,
-  getWaStatusAction,
   updateStatusSiswaBulk,
   resetPasswordSiswa,
+  type SaranAktivasiSiswa,
 } from "./actions";
 import { ImportExcelDialog } from "./import-excel";
+import { AktivasiMassalSiswaDialog } from "./aktivasi-massal";
 
 type Siswa = {
   id_siswa: string;
@@ -45,6 +44,7 @@ type Siswa = {
   aktif: boolean;
   akun_aktif: boolean;
   id_profile: string | null;
+  username: string | null;
   kelas_terkini: string | null;
 };
 
@@ -61,7 +61,15 @@ function formatTtl(tempat: string | null, tanggal: string | null) {
 const SEMUA_KELAS = "__semua__";
 const BELUM_KELAS = "__belum__";
 
-export function SiswaClient({ rows, kelasOptions }: { rows: Siswa[]; kelasOptions: string[] }) {
+export function SiswaClient({
+  rows,
+  kelasOptions,
+  saran,
+}: {
+  rows: Siswa[];
+  kelasOptions: string[];
+  saran: SaranAktivasiSiswa[];
+}) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [filterKelas, setFilterKelas] = useState(SEMUA_KELAS);
@@ -70,27 +78,9 @@ export function SiswaClient({ rows, kelasOptions }: { rows: Siswa[]; kelasOption
   const [message, setMessage] = useState<string | null>(null);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [waModalOpen, setWaModalOpen] = useState(false);
-  const [waMessage, setWaMessage] = useState("");
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
-  const [waOnline, setWaOnline] = useState<boolean | null>(null);
   const [isBulkPending, startBulkTransition] = useTransition();
-
-  useEffect(() => {
-    let cancelled = false;
-    const cekStatus = () => {
-      getWaStatusAction()
-        .then((online) => !cancelled && setWaOnline(online))
-        .catch(() => !cancelled && setWaOnline(false));
-    };
-    cekStatus();
-    const interval = setInterval(cekStatus, 20000);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -106,6 +96,13 @@ export function SiswaClient({ rows, kelasOptions }: { rows: Siswa[]; kelasOption
       return matchKelas && matchSearch;
     });
   }, [rows, search, filterKelas]);
+
+  const belumAktivasi = useMemo(
+    () => filtered.filter((r) => !r.akun_aktif).map((r) => ({ id_siswa: r.id_siswa, nama_lengkap: r.nama_lengkap })),
+    [filtered],
+  );
+  const belumAktivasiIds = useMemo(() => new Set(belumAktivasi.map((s) => s.id_siswa)), [belumAktivasi]);
+  const saranFiltered = useMemo(() => saran.filter((s) => belumAktivasiIds.has(s.id_siswa)), [saran, belumAktivasiIds]);
 
   function handleReset() {
     if (!resetTarget?.id_profile || !resetTarget.nisn) return;
@@ -156,22 +153,6 @@ export function SiswaClient({ rows, kelasOptions }: { rows: Siswa[]; kelasOption
     });
   }
 
-  function handleBulkWa() {
-    if (!selectedIds.size || !waMessage.trim()) return;
-    const formData = new FormData();
-    formData.set("ids", [...selectedIds].join(","));
-    formData.set("message", waMessage.trim());
-    startBulkTransition(async () => {
-      const result = await sendWaBulkSiswa(formData);
-      setMessage(result.message);
-      if (result.success) {
-        setSelectedIds(new Set());
-        setWaMessage("");
-        setWaModalOpen(false);
-      }
-    });
-  }
-
   function handleBulkStatus(aktif: boolean) {
     const ids = [...selectedIds];
     startBulkTransition(async () => {
@@ -187,25 +168,38 @@ export function SiswaClient({ rows, kelasOptions }: { rows: Siswa[]; kelasOption
 
   const filterLabel =
     filterKelas === SEMUA_KELAS ? "Semua Kelas" : filterKelas === BELUM_KELAS ? "Belum Masuk Kelas" : filterKelas;
+  const printTitle =
+    filterKelas === SEMUA_KELAS
+      ? "Data Siswa"
+      : filterKelas === BELUM_KELAS
+        ? "Data Siswa Belum Masuk Kelas"
+        : `Data Siswa Kelas ${filterKelas}`;
 
   return (
-    <>
-      <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-0.5">
+      <div className="no-print flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-semibold">Import & aksi massal siswa</p>
+          <p className="text-sm font-semibold">Import Data Siswa</p>
+          <p className="text-sm text-muted-foreground">Tambahkan banyak siswa sekaligus dari file Excel.</p>
+        </div>
+        <ImportExcelDialog onSelesai={() => router.refresh()} />
+      </div>
+
+      <div className="no-print flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold">Aksi Massal Siswa</p>
           <p className="text-sm text-muted-foreground">
-            Import data dari Excel, atau centang siswa di tabel untuk mengubah status, menghapus, atau mengirim WhatsApp sekaligus.
+            Aktivasi akun, atau centang siswa di tabel untuk mengubah status atau menghapus sekaligus (mengikuti
+            filter kelas &amp; pencarian saat ini).
             {selectedIds.size > 0 ? ` ${selectedIds.size} siswa dipilih.` : ""}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {waOnline !== null && (
-            <Badge variant="outline" className="gap-1.5">
-              <span className={`h-2 w-2 rounded-full ${waOnline ? "bg-emerald-500" : "bg-red-500"}`} />
-              WhatsApp {waOnline ? "Online" : "Offline"}
-            </Badge>
-          )}
-          <ImportExcelDialog onSelesai={() => router.refresh()} />
+          <AktivasiMassalSiswaDialog
+            siswaBelumAktivasi={belumAktivasi}
+            saran={saranFiltered}
+            onSelesai={() => router.refresh()}
+          />
           <Button
             type="button"
             variant="outline"
@@ -226,19 +220,10 @@ export function SiswaClient({ rows, kelasOptions }: { rows: Siswa[]; kelasOption
             <Trash2 className="size-4" />
             Hapus {selectedIds.size > 0 ? `(${selectedIds.size})` : ""}
           </Button>
-          <Button
-            type="button"
-            onClick={() => setWaModalOpen(true)}
-            className="gap-2"
-            disabled={selectedIds.size === 0}
-          >
-            <SendHorizonal className="size-4" />
-            Kirim WhatsApp {selectedIds.size > 0 ? `(${selectedIds.size})` : ""}
-          </Button>
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="no-print flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -266,12 +251,17 @@ export function SiswaClient({ rows, kelasOptions }: { rows: Siswa[]; kelasOption
             ))}
           </SelectContent>
         </Select>
+        <Button type="button" variant="outline" className="w-full gap-2 sm:ml-auto sm:w-auto" onClick={() => window.print()}>
+          <Printer className="size-4" />
+          Cetak PDF
+        </Button>
       </div>
 
       {message && (
-        <p className="rounded-md bg-primary/10 px-3 py-2 text-sm text-primary">{message}</p>
+        <p className="no-print rounded-md bg-primary/10 px-3 py-2 text-sm text-primary">{message}</p>
       )}
 
+      <div className="no-print">
       <SimpleCrud<Siswa>
         title="Siswa"
         idKey="id_siswa"
@@ -332,6 +322,29 @@ export function SiswaClient({ rows, kelasOptions }: { rows: Siswa[]; kelasOption
           ) : null
         }
       />
+      </div>
+
+      <div className="hidden print:block p-6">
+        <h1 className="mb-3 text-lg font-bold">{printTitle}</h1>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="border">Nama Lengkap</TableHead>
+              <TableHead className="border">Username</TableHead>
+              <TableHead className="border">No HP</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((r) => (
+              <TableRow key={r.id_siswa}>
+                <TableCell className="border">{r.nama_lengkap}</TableCell>
+                <TableCell className="border">{r.username ?? "-"}</TableCell>
+                <TableCell className="border">{r.no_hp ?? "-"}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <Dialog open={!!resetTarget} onOpenChange={(open) => !open && setResetTarget(null)}>
         <DialogContent>
@@ -353,39 +366,6 @@ export function SiswaClient({ rows, kelasOptions }: { rows: Siswa[]; kelasOption
             </Button>
             <Button onClick={handleReset} disabled={isPending}>
               {isPending ? "Memproses..." : "Reset Password"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={waModalOpen} onOpenChange={setWaModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Kirim WhatsApp ke {selectedIds.size} siswa</DialogTitle>
-            <DialogDescription>Pesan akan dikirim ke seluruh siswa yang dicentang di tabel.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2">
-            <Label htmlFor="wa-message-siswa">Pesan</Label>
-            <Textarea
-              id="wa-message-siswa"
-              value={waMessage}
-              onChange={(event) => setWaMessage(event.target.value)}
-              rows={4}
-              placeholder="Contoh: Assalamualaikum, informasi penting..."
-            />
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setWaModalOpen(false)}>
-              Batal
-            </Button>
-            <Button
-              type="button"
-              onClick={handleBulkWa}
-              disabled={isBulkPending || !selectedIds.size || !waMessage.trim()}
-              className="gap-2"
-            >
-              <SendHorizonal className="size-4" />
-              {isBulkPending ? "Mengirim..." : "Kirim WhatsApp"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -432,6 +412,6 @@ export function SiswaClient({ rows, kelasOptions }: { rows: Siswa[]; kelasOption
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

@@ -15,5 +15,12 @@ export async function updateFotoGuru(formData: FormData): Promise<ActionResult> 
 
   const { error } = await supabase.from("guru").update({ foto_url: fotoUrl }).eq("id_guru", profile.id_guru);
   if (error) return { success: false, message: error.message };
+
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .update({ foto: fotoUrl })
+    .eq("id_profile", profile.id_profile);
+  if (profileError) return { success: false, message: profileError.message };
+
   return { success: true, message: "Foto profil berhasil diperbarui." };
 }

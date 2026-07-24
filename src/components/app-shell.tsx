@@ -12,6 +12,9 @@ export function AppShell({
   navItems,
   tahunAjaranLabel,
   email,
+  namaLengkap,
+  fotoUrl,
+  gantiPasswordHref,
   children,
   currentUserId,
   mainClassName = "flex-1 overflow-x-hidden p-4 md:p-8 print:p-0",
@@ -22,6 +25,9 @@ export function AppShell({
   navItems: NavItem[];
   tahunAjaranLabel: string | null;
   email: string | null;
+  namaLengkap: string | null;
+  fotoUrl: string | null;
+  gantiPasswordHref: string;
   children: React.ReactNode;
   currentUserId?: string;
   mainClassName?: string;
@@ -37,6 +43,9 @@ export function AppShell({
         <TopBar
           tahunAjaranLabel={tahunAjaranLabel}
           email={email}
+          namaLengkap={namaLengkap}
+          fotoUrl={fotoUrl}
+          gantiPasswordHref={gantiPasswordHref}
           navTitle={title}
           navItems={navItems}
           isSidebarCollapsed={sidebarCollapsed}

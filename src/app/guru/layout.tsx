@@ -14,7 +14,6 @@ const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/guru/bank-soal", label: "Bank Soal", icon: "book-marked" },
   { href: "/guru/nilai", label: "Nilai", icon: "notebook-text" },
   { href: "/guru/laporan", label: "Laporan", icon: "bar-chart" },
-  { href: "/guru/ganti-password", label: "Ganti Password", icon: "key-round" },
 ];
 
 export default async function GuruLayout({ children }: { children: React.ReactNode }) {
@@ -22,7 +21,16 @@ export default async function GuruLayout({ children }: { children: React.ReactNo
   const tahunAjaranLabel = await getTahunAjaranAktifLabel();
 
   return (
-    <AppShell title="Guru" navItems={NAV_ITEMS} tahunAjaranLabel={tahunAjaranLabel} email={profile.email} currentUserId={profile.id_profile}>
+    <AppShell
+      title="Guru"
+      navItems={NAV_ITEMS}
+      tahunAjaranLabel={tahunAjaranLabel}
+      email={profile.email}
+      namaLengkap={profile.nama_lengkap}
+      fotoUrl={profile.foto}
+      gantiPasswordHref="/guru/ganti-password"
+      currentUserId={profile.id_profile}
+    >
       {children}
     </AppShell>
   );

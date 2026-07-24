@@ -1,14 +1,26 @@
 "use client";
 
-import { LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import Link from "next/link";
+import { KeyRound, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { logoutAction } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileNav, type NavItem } from "@/components/sidebar-nav";
+import { InitialsAvatar } from "@/components/initials-avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function TopBar({
   tahunAjaranLabel,
   email,
+  namaLengkap,
+  fotoUrl,
+  gantiPasswordHref,
   navTitle,
   navItems,
   isSidebarCollapsed = false,
@@ -17,6 +29,9 @@ export function TopBar({
 }: {
   tahunAjaranLabel: string | null;
   email: string | null;
+  namaLengkap: string | null;
+  fotoUrl: string | null;
+  gantiPasswordHref: string;
   navTitle: string;
   navItems: NavItem[];
   isSidebarCollapsed?: boolean;
@@ -52,13 +67,27 @@ export function TopBar({
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         {notifSlot}
         <ThemeToggle />
-        {email && <span className="hidden max-w-40 truncate text-sm text-muted-foreground md:inline">{email}</span>}
-        <form action={logoutAction}>
-          <Button type="submit" variant="outline" size="sm" className="gap-1.5">
-            <LogOut className="size-3.5" />
-            <span className="hidden sm:inline">Logout</span>
-          </Button>
-        </form>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <InitialsAvatar name={namaLengkap ?? "?"} fotoUrl={fotoUrl} className="size-8 text-xs" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="px-1.5 py-1">
+              <p className="truncate text-sm font-medium text-foreground">{namaLengkap ?? "Pengguna"}</p>
+              {email && <p className="truncate text-xs text-muted-foreground">{email}</p>}
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem render={<Link href={gantiPasswordHref} />}>
+              <KeyRound className="size-4" />
+              Ganti Password
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onClick={() => void logoutAction()}>
+              <LogOut className="size-4" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

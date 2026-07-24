@@ -105,10 +105,6 @@ export function LoginForm({
       <Button type="submit" disabled={isPending} className="mt-2">
         {isPending ? "Memproses..." : "Masuk"}
       </Button>
-
-      <a href="/aktivasi" className="text-center text-sm text-muted-foreground hover:underline">
-        Belum punya akun? Aktivasi di sini
-      </a>
     </form>
   );
 }

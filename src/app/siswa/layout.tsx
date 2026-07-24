@@ -13,7 +13,6 @@ const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/siswa/sertifikat", label: "Sertifikat Saya", icon: "award" },
   { href: "/siswa/proyek", label: "Project & Inovasi", icon: "sparkles" },
   { href: "/siswa/konseling", label: "Konseling AI", icon: "message-circle" },
-  { href: "/siswa/ganti-password", label: "Ganti Password", icon: "key-round" },
 ];
 
 export default async function SiswaLayout({ children }: { children: React.ReactNode }) {
@@ -21,7 +20,16 @@ export default async function SiswaLayout({ children }: { children: React.ReactN
   const tahunAjaranLabel = await getTahunAjaranAktifLabel();
 
   return (
-    <AppShell title="Siswa" navItems={NAV_ITEMS} tahunAjaranLabel={tahunAjaranLabel} email={profile.email} currentUserId={profile.id_profile}>
+    <AppShell
+      title="Siswa"
+      navItems={NAV_ITEMS}
+      tahunAjaranLabel={tahunAjaranLabel}
+      email={profile.email}
+      namaLengkap={profile.nama_lengkap}
+      fotoUrl={profile.foto}
+      gantiPasswordHref="/siswa/ganti-password"
+      currentUserId={profile.id_profile}
+    >
       {children}
     </AppShell>
   );

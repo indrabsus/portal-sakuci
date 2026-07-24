@@ -13,7 +13,6 @@ const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/kajur/inovasi-siswa", label: "Project & Inovasi Siswa", icon: "sparkles" },
   { href: "/kajur/konseling", label: "Konseling Siswa", icon: "heart-handshake" },
   { href: "/kajur/laporan", label: "Laporan Keaktifan", icon: "bar-chart" },
-  { href: "/kajur/ganti-password", label: "Ganti Password", icon: "key-round" },
 ];
 
 export default async function KajurLayout({ children }: { children: React.ReactNode }) {
@@ -21,7 +20,16 @@ export default async function KajurLayout({ children }: { children: React.ReactN
   const tahunAjaranLabel = await getTahunAjaranAktifLabel();
 
   return (
-    <AppShell title="Kajur" navItems={NAV_ITEMS} tahunAjaranLabel={tahunAjaranLabel} email={profile.email} currentUserId={profile.id_profile}>
+    <AppShell
+      title="Kajur"
+      navItems={NAV_ITEMS}
+      tahunAjaranLabel={tahunAjaranLabel}
+      email={profile.email}
+      namaLengkap={profile.nama_lengkap}
+      fotoUrl={profile.foto}
+      gantiPasswordHref="/kajur/ganti-password"
+      currentUserId={profile.id_profile}
+    >
       {children}
     </AppShell>
   );
