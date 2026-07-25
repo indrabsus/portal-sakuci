@@ -20,6 +20,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SimpleCrud } from "@/components/simple-crud";
+import { printPortraitA4 } from "@/lib/print-portrait";
 import {
   createSiswa,
   updateSiswa,
@@ -251,7 +252,7 @@ export function SiswaClient({
             ))}
           </SelectContent>
         </Select>
-        <Button type="button" variant="outline" className="w-full gap-2 sm:ml-auto sm:w-auto" onClick={() => window.print()}>
+        <Button type="button" variant="outline" className="w-full gap-2 sm:ml-auto sm:w-auto" onClick={printPortraitA4}>
           <Printer className="size-4" />
           Cetak PDF
         </Button>
@@ -327,8 +328,8 @@ export function SiswaClient({
       <div className="hidden print:block p-6">
         <h1 className="mb-3 text-lg font-bold">{printTitle}</h1>
         <Table>
-          <TableHeader>
-            <TableRow>
+          <TableHeader className="print:table-header-group">
+            <TableRow className="print:break-inside-avoid">
               <TableHead className="border">Nama Lengkap</TableHead>
               <TableHead className="border">Username</TableHead>
               <TableHead className="border">No HP</TableHead>
@@ -336,7 +337,7 @@ export function SiswaClient({
           </TableHeader>
           <TableBody>
             {filtered.map((r) => (
-              <TableRow key={r.id_siswa}>
+              <TableRow key={r.id_siswa} className="print:break-inside-avoid">
                 <TableCell className="border">{r.nama_lengkap}</TableCell>
                 <TableCell className="border">{r.username ?? "-"}</TableCell>
                 <TableCell className="border">{r.no_hp ?? "-"}</TableCell>

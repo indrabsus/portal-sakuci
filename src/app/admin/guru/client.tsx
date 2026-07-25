@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SimpleCrud } from "@/components/simple-crud";
 import { InitialsAvatar } from "@/components/initials-avatar";
+import { printPortraitA4 } from "@/lib/print-portrait";
 import { AktivasiMassalDialog } from "./aktivasi-massal";
 import { createGuru, updateGuru, deleteGuru, type SaranAktivasiGuru } from "./actions";
 
@@ -37,7 +38,7 @@ export function GuruClient({ rows, saran }: { rows: Guru[]; saran: SaranAktivasi
           <Button
             type="button"
             variant="outline"
-            onClick={() => window.print()}
+            onClick={printPortraitA4}
             className="gap-2"
             disabled={rows.length === 0}
           >
@@ -99,8 +100,8 @@ export function GuruClient({ rows, saran }: { rows: Guru[]; saran: SaranAktivasi
       <div className="hidden print:block p-6">
         <h1 className="mb-3 text-lg font-bold">Data Guru</h1>
         <Table>
-          <TableHeader>
-            <TableRow>
+          <TableHeader className="print:table-header-group">
+            <TableRow className="print:break-inside-avoid">
               <TableHead className="border">Nama Lengkap</TableHead>
               <TableHead className="border">Username</TableHead>
               <TableHead className="border">No HP</TableHead>
@@ -108,7 +109,7 @@ export function GuruClient({ rows, saran }: { rows: Guru[]; saran: SaranAktivasi
           </TableHeader>
           <TableBody>
             {rows.map((r) => (
-              <TableRow key={r.id_guru}>
+              <TableRow key={r.id_guru} className="print:break-inside-avoid">
                 <TableCell className="border">{r.nama_lengkap}</TableCell>
                 <TableCell className="border">{r.username ?? "-"}</TableCell>
                 <TableCell className="border">{r.no_hp ?? "-"}</TableCell>
