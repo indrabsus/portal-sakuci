@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { AppFooter } from "@/components/app-footer";
+import { CircuitOverlay } from "@/components/circuit-overlay";
 import { SidebarNav, type NavItem } from "@/components/sidebar-nav";
 import { TopBar } from "@/components/top-bar";
 import { FloatingChat } from "@/features/chat/floating-chat";
 import { ChatNotifBell } from "@/features/chat/chat-notif-bell";
+import { cn } from "@/lib/utils";
 
 export function AppShell({
   title,
@@ -52,9 +54,10 @@ export function AppShell({
           onToggleSidebar={() => setSidebarCollapsed((value) => !value)}
           notifSlot={currentUserId ? <ChatNotifBell currentUserId={currentUserId} /> : undefined}
         />
-        <main className={mainClassName}>
-          <div className={contentClassName}>{children}</div>
-          <div className={footerClassName}>
+        <main className={cn("relative", mainClassName)}>
+          <CircuitOverlay className="opacity-[0.05] dark:opacity-[0.07] print:hidden" />
+          <div className={cn("relative", contentClassName)}>{children}</div>
+          <div className={cn("relative", footerClassName)}>
             <AppFooter />
           </div>
         </main>

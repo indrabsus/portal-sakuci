@@ -4,6 +4,7 @@ import Link from "next/link";
 import { KeyRound, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { logoutAction } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
+import { CircuitOverlay } from "@/components/circuit-overlay";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileNav, type NavItem } from "@/components/sidebar-nav";
 import { InitialsAvatar } from "@/components/initials-avatar";
@@ -39,8 +40,9 @@ export function TopBar({
   notifSlot?: React.ReactNode;
 }) {
   return (
-    <header className="dark flex h-14 items-center justify-between gap-2 border-b bg-black px-3 text-foreground sm:px-6">
-      <div className="flex min-w-0 items-center gap-2">
+    <header className="dark relative flex h-14 items-center justify-between gap-2 overflow-hidden border-b bg-black px-3 text-foreground sm:px-6">
+      <CircuitOverlay className="opacity-[0.14]" />
+      <div className="relative flex min-w-0 items-center gap-2">
         <MobileNav title={navTitle} items={navItems} />
         {onToggleSidebar && (
           <Button
@@ -64,7 +66,7 @@ export function TopBar({
         </p>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+      <div className="relative flex shrink-0 items-center gap-2 sm:gap-3">
         {notifSlot}
         <ThemeToggle />
         <DropdownMenu>
