@@ -31,8 +31,6 @@ import {
   NotebookPen,
   ArrowRightLeft,
   Menu,
-  PanelLeftClose,
-  PanelLeftOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -108,7 +106,7 @@ export function SidebarNav({ title, items, collapsed = false }: { title: string;
 
   return (
     <aside className="dark relative hidden w-60 shrink-0 flex-col overflow-hidden border-r bg-black text-foreground md:flex">
-      <CircuitOverlay className="opacity-[0.14]" />
+      <CircuitOverlay className="opacity-30" />
       <div className="relative flex h-14 shrink-0 items-center border-b px-5">
         <p className="text-lg font-bold tracking-tight">{title}</p>
       </div>
@@ -133,7 +131,7 @@ export function MobileNav({ title, items }: { title: string; items: NavItem[] })
         <Menu className="size-5" />
       </Button>
       <SheetContent side="left" className="dark relative flex w-3/4 max-w-xs flex-col overflow-hidden bg-black p-0 text-foreground">
-        <CircuitOverlay className="opacity-[0.14]" />
+        <CircuitOverlay className="opacity-30" />
         <SheetHeader className="relative border-b px-5 py-0">
           <SheetTitle className="flex h-14 items-center text-lg font-bold tracking-tight">
             {title}

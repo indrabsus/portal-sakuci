@@ -5,7 +5,6 @@ import { KeyRound, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { logoutAction } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
 import { CircuitOverlay } from "@/components/circuit-overlay";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileNav, type NavItem } from "@/components/sidebar-nav";
 import { InitialsAvatar } from "@/components/initials-avatar";
 import {
@@ -41,7 +40,7 @@ export function TopBar({
 }) {
   return (
     <header className="dark relative flex h-14 items-center justify-between gap-2 overflow-hidden border-b bg-black px-3 text-foreground sm:px-6">
-      <CircuitOverlay className="opacity-[0.14]" />
+      <CircuitOverlay className="opacity-30" />
       <div className="relative flex min-w-0 items-center gap-2">
         <MobileNav title={navTitle} items={navItems} />
         {onToggleSidebar && (
@@ -68,7 +67,6 @@ export function TopBar({
 
       <div className="relative flex shrink-0 items-center gap-2 sm:gap-3">
         {notifSlot}
-        <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <InitialsAvatar name={namaLengkap ?? "?"} fotoUrl={fotoUrl} className="size-8 text-xs" />

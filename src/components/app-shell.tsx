@@ -55,7 +55,7 @@ export function AppShell({
           notifSlot={currentUserId ? <ChatNotifBell currentUserId={currentUserId} /> : undefined}
         />
         <main className={cn("relative", mainClassName)}>
-          <CircuitOverlay className="opacity-[0.05] dark:opacity-[0.07] print:hidden" />
+          <CircuitOverlay className="opacity-10 print:hidden" />
           <div className={cn("relative", contentClassName)}>{children}</div>
           <div className={cn("relative", footerClassName)}>
             <AppFooter />
