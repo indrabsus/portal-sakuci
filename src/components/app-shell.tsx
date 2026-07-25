@@ -17,7 +17,7 @@ export function AppShell({
   gantiPasswordHref,
   children,
   currentUserId,
-  mainClassName = "flex-1 overflow-x-hidden p-4 md:p-8 print:p-0",
+  mainClassName = "flex-1 overflow-x-hidden p-4 md:p-8 print:block print:h-auto print:flex-none print:overflow-visible print:p-0",
   contentClassName = "mx-auto max-w-6xl print:max-w-none",
   footerClassName = "mx-auto max-w-6xl print:hidden",
 }: {
@@ -37,9 +37,9 @@ export function AppShell({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen print:block print:min-h-0">
       <SidebarNav title={title} items={navItems} collapsed={sidebarCollapsed} />
-      <div className="flex flex-1 flex-col bg-muted/30">
+      <div className="flex flex-1 flex-col bg-muted/30 print:block print:flex-none">
         <TopBar
           tahunAjaranLabel={tahunAjaranLabel}
           email={email}
