@@ -8,6 +8,8 @@ const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/guru/absen", label: "Absen", icon: "calendar-range" },
   { href: "/guru/profil", label: "Profil Saya", icon: "user-circle" },
   { href: "/guru/mengajar", label: "Pembagian Mengajar", icon: "school" },
+  { href: "/guru/absen-siswa", label: "Absen Siswa", icon: "clipboard-list" },
+  { href: "/guru/rekap-absen-siswa", label: "Rekap Absen Siswa", icon: "list-checks" },
   { href: "/guru/materi", label: "Materi", icon: "book-open" },
   { href: "/guru/tugas", label: "Tugas", icon: "file-text" },
   { href: "/guru/pengumpulan", label: "Pengumpulan Tugas", icon: "clipboard-check" },
