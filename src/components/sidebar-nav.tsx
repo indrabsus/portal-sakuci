@@ -132,7 +132,7 @@ export function MobileNav({ title, items }: { title: string; items: NavItem[] })
       >
         <Menu className="size-5" />
       </Button>
-      <SheetContent side="top" className="dark relative flex max-h-[85vh] w-full flex-col overflow-hidden bg-black p-0 text-foreground">
+      <SheetContent side="top" className="dark relative flex max-h-[85dvh] w-full flex-col overflow-hidden bg-black p-0 text-foreground">
         <CircuitOverlay className="opacity-30" />
         <SheetHeader className="relative border-b px-5 py-0">
           <SheetTitle className="flex h-14 items-center text-lg font-bold tracking-tight">
