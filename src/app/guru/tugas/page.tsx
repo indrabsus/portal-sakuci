@@ -28,6 +28,7 @@ export default async function TugasPage() {
       .from("tugas")
       .select("id_tugas, id_mengajar, judul, deskripsi, deadline, status, semester")
       .in("id_mengajar", idMengajarList.length ? idMengajarList : [""])
+      .eq("tipe", "portal")
       .order("created_at", { ascending: false }),
     supabase.from("tugas_soal").select("id_tugas"),
     supabase

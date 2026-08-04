@@ -15,6 +15,7 @@ const NAV_ITEMS: { href: string; label: string; icon: NavIconKey }[] = [
   { href: "/guru/pengumpulan", label: "Pengumpulan Tugas", icon: "clipboard-check" },
   { href: "/guru/bank-soal", label: "Bank Soal", icon: "book-marked" },
   { href: "/guru/nilai", label: "Nilai", icon: "notebook-text" },
+  { href: "/guru/nilai-manual", label: "Nilai Manual", icon: "notebook-pen" },
   { href: "/guru/laporan", label: "Laporan", icon: "bar-chart" },
 ];
 

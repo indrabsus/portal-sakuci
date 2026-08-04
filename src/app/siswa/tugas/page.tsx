@@ -32,6 +32,7 @@ export default async function SiswaTugasPage() {
     .select("id_tugas, judul, deadline, id_mengajar, status")
     .in("id_mengajar", idMengajarList.length ? idMengajarList : [""])
     .eq("status", "aktif")
+    .eq("tipe", "portal")
     .order("deadline", { ascending: true });
 
   const idTugasList = (tugasList ?? []).map((t) => t.id_tugas);
